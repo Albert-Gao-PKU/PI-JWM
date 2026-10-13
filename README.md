@@ -2,7 +2,7 @@
 
 Physical–Information Joint World Model（物理—信息联合世界模型）的独立研究仓库。
 
-仓库所有者：Albert-Gao-PKU。仓库地址：https://github.com/Albert-Gao-PKU/PI-JWM 。可见性：私有。
+仓库所有者：Albert-Gao-PKU。仓库地址：https://github.com/Albert-Gao-PKU/PI-JWM 。可见性：公开（2026-10-13按用户要求由私有改为公开）。
 
 本版保留既有双图、Structured RSSM、动作、规则递推、预测头及训练协议，增加三项可独立关闭的编码器扩展：
 

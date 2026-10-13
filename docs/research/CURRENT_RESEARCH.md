@@ -4,7 +4,7 @@
 
 ## 仓库与来源
 
-- GitHub：Albert-Gao-PKU/PI-JWM，私有。
+- GitHub：Albert-Gao-PKU/PI-JWM，公开；2026-10-13初建私有，随后按用户要求改为公开。
 - 独立WSL工作区：/home/gao/projects/PI-JWM。
 - 原上游工作区：/home/gao/projects/pi-jwm-upstream-20260929，其origin和暂存/未提交内容保留不变。
 - baseline：yys806/network-state-world-model，提交f95bf2e5b9430666f325af3e6d6846d68b97e6e8。

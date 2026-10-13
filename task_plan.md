@@ -1,3 +1,9 @@
+## 2026-10-13 按用户要求公开仓库
+
+- [x] 将Albert-Gao-PKU/PI-JWM由私有改为公开，未登录GitHub REST API核验private=false、visibility=public。
+- [x] 当前README/CURRENT_RESEARCH同步公开状态，初建私有及当时安全预检记录保留。
+- 本次只修改仓库可见性与相应说明，未上传新数据或修改模型；文档提交推送后停止，等待用户下一步。
+
 ## 2026-10-13 独立私有Git仓库
 
 - 用户指定新仓库PI-JWM、私有；所有者Albert-Gao-PKU。

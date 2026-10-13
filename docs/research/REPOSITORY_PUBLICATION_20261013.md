@@ -2,6 +2,8 @@
 
 日期：2026-10-13。
 
+后续同日更新：用户明确要求改为公开，已完成GitHub可见性切换。未登录GitHub REST API核验full_name=Albert-Gao-PKU/PI-JWM、private=false、visibility=public。以下私有发布描述是创建当时的历史事实；当前以公开状态为准。没有新增数据、权重、模型修改或训练。
+
 ## 创建和推送
 
 - 用户指定名称PI-JWM、可见性私有。

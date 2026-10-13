@@ -1,5 +1,9 @@
 # Findings
 
+## 2026-10-13 公开状态核验
+
+仓库公开以未登录GitHub API的private=false、visibility=public为准，不根据页面按钮点击单独声称成功。原publication_preflight中的private和初建私有记录保留为历史时点信息；当前README/CURRENT_RESEARCH已注明公开。未新增数据/权重或更改模型。
+
 ## 2026-10-13 独立仓库边界
 
 Git已跟踪清单含历史协议样本与张量，因此不能整体推送原Git历史或直接git add全部原工作区。采用新仓库快照，排除code/artifacts非manifest载荷及数据/权重扩展。774个Python源码编译通过，805个代码/脚本/测试文件与原工作树一致。整体新根提交的diff-check报告上游文档/模板尾部空白，保留原字节未机械清理；新增README/.gitignore/CURRENT_RESEARCH/数学说明的范围检查通过。历史开发夹具未上传，不能宣称新clone全部测试通过。
