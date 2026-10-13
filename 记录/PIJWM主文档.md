@@ -1,0 +1,2796 @@
+# PI-JWM 理论定义与固定技术规范
+
+## 2026-10-02 可选研究编码器合同
+
+原冻结定义与 baseline 不变。本地研究分支额外提供三个独立开关：当前端点六维几何用于 P2C、按窗口稳定实体端点/类型对齐后的 CSI GRU、信息关系按 family/direction 的 mean+log1p(关系条数) 聚合。
+保持16维联合图输出、原RSSM/动作/规则/预测头/Loss/KL/Metric及48/12轨迹划分。显式记录实验合同，不把新版冒称原“无通信历史记忆”验收通过。
+标量速度差不等于径向速度；关系条数不等于唯一任务数。参见研究实现文档与最终 readiness 收据；不存在正式泛化/规划提升结论。
+
+## 2026-09-29 STEP 6.3B 候选语法与支持政策
+
+研究者冻结 Planner v1 正式候选池：Route 每步显式空；Comm 在当前因果无线 Flow/关系上覆盖 eligible Task，允许同 Task 多条 TRAIN 支持的循环 RB block；Comp 在当前 predicted computing/Exec 状态逐步重建既有 CPU base，采用单时隙全局 alpha 0.5/0.75/1.0；Mob 在场 UAV 共享同一 HOLD/PROFILE_1–5。每步联合粗粒度结构须为 Formal TRAIN 已见签名；边际已见但联合未见留作未来消融。时间观察性仅标记，不作为准入硬门槛。未来每步重新绑定预测状态，`H_sup` 由后续实际推演/scorer 判定。详见 STEP 6.3B 合同；这不选择搜索算法或声明规划性能。
+
+## 2026-09-28 STEP 6.2B-PATCH 方法边界
+
+研究者将 Planner v1 Route 正式限定为 `EXPLICIT_NOOP_ONLY`：每个 horizon Route family 为空，Comm/Comp/Mob 是当前可优化动作族。Route schema、learned encoder 和多跳确定性代码保留，未来真正 Route/offload/multi-hop 优化另行研究。冻结 Objective `(N_DDL,A_DDL,J_Delay,J_Burden,J_Effort)` 与严格字典序不变。当前 `STEP_6_2B=PASS` 只证明已给定合法 H1–H4 候选轨迹的 CPU scorer/comparator 合同，不证明候选生成、闭环或性能。先前单跳 Route 域是历史决定，现由更严格 no-op 边界覆盖。
+
+## 2026-09-28 STEP 6.1 实现与理论边界
+
+Definition 06 的“同一当前状态/双图/latent → 不同候选动作 → 逐步世界模型未来轨迹”已在冻结 5.6C 模型上做 CPU H1–H4 机制预检：当前 posterior mean 仅计算一次，未来只用 prior mean 和期望无线服务；Route/Comm/Comp/Mob 的当前因果合法动作逐族注入并记录状态、潜变量和 decoder 响应。该预检不含候选轨迹评价/选择、MPC objective 或下一真实观测的闭环重规划，不得称 Planner 已完成。`TRAINED_WORLD_MODEL_CANDIDATE_ROLLOUT` 只表示机器 receipt 的机制验收状态；科学方法与性能结论仍由研究者另行决定。
+
+
+## 2026-09-26 STEP 6.0C 方法边界
+
+研究者决定：第一版 Planner Comp 使用当前因果 Raw 静态 CPU 容量的每节点每时隙预算；UAV 使用正式行为支持的六档边际动作，heading/elevation 仅为 Planner 控制侧状态。HOLD 是显式零速命令。本域不是仿真器动态可用量/硬界、安全或最优动作空间；模型依赖 rollout、目标函数与闭环尚未执行。详见 `docs/contracts/PIJWM_STEP_06_0C_PLANNER_ACTION_DOMAIN_V1.md`。
+
+## 2026-09-26 STEP 6.0B 来源审计边界
+
+静态 CPU 容量、Comp 请求、实际服务、动态可用 CPU 是四种不同量；当前仅前三者有各自来源，第四者仍未知。UAV 示例配置和正式行为数据范围不是可直接冻结的 Planner 硬可行域。6.0A 两项 UNKNOWN 保留，未改变研究者选择的 MPC 后续框架或四动作空间。
+
+## 2026-09-26 实现边界：STEP 6.0A
+
+研究者选定的后续 MPC 路线和 Route/Comm/Comp/Mob 四动作保持不变。当前只实现候选生成的 CPU 静态结构、约束与正式动作张量编译；Search/Learned/Hybrid 最终选型、未来评价和选择尚未决定或实现。最大长度 4 来自 World Model H1–H4 证据边界，并非最优时域结论。详细合同与合成验收见 STEP 6.0A 实施记录，不能把它表述为已完成世界模型候选规划。
+
+## 2026-09-22 STEP 5.2 实现边界（当前）
+
+STEP 5.2 已把冻结的 Definition 05 loss/KL/metric primitives 与 4.3B Encoder、4.4 Structured RSSM 接成 CPU development training loop。Stage 1 使用对应 Motion/CSI future posterior teacher；Stage 2 与 validation 使用 prior-only recursive rollout；`beta_KL`、free bits、curriculum、optimizer、checkpoint/resume 均为配置化 engineering path。8/4 unified non-locked development bundle 的两步 smoke 和 20/20 receipt checks 通过。
+
+这只证明训练循环、参数更新、验证隔离和恢复机制在 CPU development scope 可执行，不证明 tiny-data overfit、full training、预测性能、GPU readiness、正式 Dataset、baseline、Planner 或 `locked_test`。当前仍保持 `full_training=false`、`gpu=false`、`formal_dataset=false`、`locked_test=false`、`performance_claim=false`；Route/Comp non-empty coverage=0 继续作为未来 formal training/data coverage gate。下一独立门是 STEP 5.3。
+
+## 2026-09-21 STEP 5.1A-PATCH — Motion 局部一步语义与稳定槽位
+
+Motion learned head 与 STEP 4.4 recursive transition 的统一语义为：第 `k` 个 future target 使用 `[p_(t+k)-p_(t+k-1), v_(t+k)]`。第一步参考 History 最后一帧，第二步以后参考前一个 Future Ground-Truth frame；这只是 training target 构造，不允许 prior、History 或 current graph 读取 Future Target。delta 每个坐标分量仅在相邻两帧该分量都有效时 mask=true，禁止跨缺失帧累计位移。
+
+Motion supervision 的 entity 轴固定采用 `static.input_entity_index["physical"]`。每个 slot 永远绑定同一个 current input entity ID；current non-Vehicle 全 mask=false，current Vehicle 消失时保留 slot，future-only Vehicle 只记 side metadata。CSI supervision 的 relation 轴固定绑定 current model communication slot，并显式核对 relation ID、source/target input slot、relation type 与 RB identity。旧初版中 horizon 2+ anchor-to-future delta 和 future-row-order Motion alignment 已由本 Patch 废止。
+
+## 2026-09-21 STEP 5.1A Future Target 合同实现边界
+
+STEP 5.1A-PATCH 后，Definition 05 的 Future Target 数据层使用 local one-step Vehicle Motion `[delta_x, delta_y, delta_z, next_speed]`，delta 只使用冻结 position std，speed/CSI 使用 STEP 4.3B train-only stats；CSI 从真实 future outcome `channel_rows[].channel_attenuation_db` 读取，并按 current directed communication model slot 与 RB identity 对齐。wired、未来不可观测 CSI、invalid relation 和 unsupported Return birth 不删除对象或窗口，而是保留 identity、独立 mask 与 side metadata。实现位于 `code/src/pi_jwm/step5_1a_motion_csi_target_contract_v1.py`，开发 artifact 位于 `code/artifacts/protocols/pi_jwm_step5_1a_motion_csi_target_contract_v1_20260921/`。
+
+该合同只扩展 target namespace，不代表当前 encoder/world model 已读取 Future Target；12 个 non-locked development samples 不是正式 Dataset、训练或性能证据。Loss、Posterior、Metric、GPU 和 `locked_test` 仍未开始。
+
+## 2026-09-21 Definition 05 冻结训练合同
+
+本节记录研究者在 STEP 5.0 中作出的最新明确决策；它取代只读 Definition 05 旧稿中与之冲突的 observation NLL、Event/Residual loss 和 latent overshooting。5.1B/5.1D/5.2 已按本合同形成 CPU development primitives/integration；仍不等于正式训练或性能结果。
+
+- 预测分布：Motion 与 CSI decoder 输出确定性均值；随机性只由 latent `z` 表达，不学习 observation variance。
+- 重建损失：Motion 与 CSI 各自做 component-mask-normalized MSE，默认等权；训练在归一化空间，评价回到原始单位。
+- posterior teacher：只在训练时使用 family-specific future target encoder；prior 不读取 future target；posterior 不读取完整未来图、Flow、Task 或 DAG。
+- KL：Phy 只覆盖 Vehicle latent；Comm 只覆盖 wireless、present、valid 且 CSI-valid 的 relation latent。使用解析 KL，可配置 warmup/free bits，不使用 balancing。
+- 多步：latent overshooting 关闭；训练由 posterior warmup 转向 prior-dominant，horizon 按 `1→2→4→L` 推进；validation 始终 prior-only。
+- 固定支持：不支持的结构只 mask 对应 component，不丢整窗；分别计数 unsupported、unresolved 与 fixed-blocked。
+- 规则状态：不新增 Flow/Task/DAG 等规则状态 loss；允许自然可微的规则链路，但不为不可微规则制造 soft proxy。
+- 优化范围：encoder、RSSM/prior/posterior、target encoder、decoder 端到端联合训练；冻结的是结构合同，不是参数权重。
+- 选择与评价：`LVal` 为各 horizon 等权后的 Motion/CSI 等权均值，用于 `argmin` checkpoint selection 与 early stop；主报告为原始单位的逐 horizon Motion/CSI MAE/RMSE。KL 只作诊断，不确定性只作辅助，系统指标单列。
+
+历史前置缺口（STEP 5.0 时点）：未来逐 RB CSI target 和 Motion normalization 尚未进入数据/张量；这些已由 5.1A/5.1B/5.1D closure 补齐。当前 5.2 仅完成 CPU development training-loop integration，不得据此启动 full training、GPU、正式 Dataset 或 `locked_test`。
+
+> **2026-09-18 当前定义入口：** 研究者已明确将只读目录 `D:\shen\OB\科研\PIJWM` 中七个 `00–06` Markdown 文件作为当前目标定义。本文件保留此前理论、决策和证据边界；若具体对象、动作、图语义、世界模型、loss、训练或 planner 定义与最新 `00–06` 冲突，以最新定义为目标，并以 `docs/PIJWM_IMPLEMENTATION_TRACKER.md` 和 `docs/implementation_records/STEP_01_AUDIT.md` 记录实现差距。目标定义不等于代码已实现；旧 P4/P6/P0–P10 方法和结果仅按原协议作 Historical / Archived evidence。
+
+> **2026-09-20 STEP 4.2A 实现边界：** 定义 03 中已有可靠来源的 position、wireless CSI、wired relation、CPU static capability、部分 Task state 和 typed Task–Agent relation 已经独立 additive 版本链进入 Sample/Tensor。stable stateful Flow 仍无足够 Raw 来源，Physical topology 与 graph builder 仍未实现；因此这不是严格双图、消息传递、模型或训练证据。CPU capacity 继续不等于 allocation、service 或 available CPU，wired outcome 继续不等于 current relation。
+
+> **2026-09-20 STEP 4.2A-PATCH：** wireless directed structural relation 与 CSI feature observability 已分离；missing CSI 不删除 relation。return size、priority、deadline 已核实有 simulator observer getter/TaskSnapshot 来源，但 frozen Raw/Sample/Tensor 尚未透传。旧 LogicalFlow/CarryingHop 或 past outcome 均不能证明定义 03 stateful Flow 已存在。
+> **2026-09-20 STEP 4.2B：** 对真实 Task/TaskManager、传输环境、observer 和旧 LogicalFlow/CarryingHop 做了 source audit。`transmitted_size` 在当前 hop 完成后归零，不能推出端到端 Flow remaining；DAG 只有依赖门控，没有 DepData transfer source。Input/Return 只能部分构造，综合 verdict 为 `FLOW_CONTRACT_NOT_YET_SUPPORTED`，因此不进入 Graph Builder。
+> **2026-09-20 STEP 4.2C-C：** 已将 C-B Raw logical Flow/Carrying state 以独立 `logical_flow` History-union/target namespace 贯穿到 Model-ready Sample 与 CPU Tensor。Sample/Tensor 只做 index、align、mask、train-only normalization 和 collation，不重算 destination、Epoch、E2E remaining 或 holder；Graph Builder、模型、Loss、Planner、训练和 GPU 仍未开始。真实低 wired capacity trace 仅作为跨 Decision carrying evidence，formal Dataset 与容量未冻结。
+
+> 最后核查日期：2026-08-11<br>
+> 当前文件位置：`记录/PIJWM主文档.md`；2026-08-15已从原外部知识库迁入PI-JWM仓库，后续只维护本文件。<br>
+> 文档定位：只保存 PI-JWM 已确认的研究问题、系统定义、因果边界、优化与学习目标、方法接口、理论依据、数据规范和实验原则。<br>
+> 进展分工：2026-08-12 起的计划、实现记录、实验结果、失败与修正统一写入同目录的`8.12之后推进.md`，本文件不再保存周报、阶段流水账或R0-R9状态表。<br>
+> 使用原则：理论定义、汇报/PPT、代码、数据、配置、机器产物和结论必须逐项一致。尚未由代码、测试和机器证据实现的内容只能标为目标定义、候选方法或未实现。<br>
+> 更新原则：若现有接口无法实现某项理论要求，只允许补齐实现并验证，或根据数据、接口与证明同步修订理论；不得用同名模块、latent/belief、代理指标或可运行接口冒充完整方法。
+
+## 2026-08-26 双约束主线（当前方法与实验的永久约束）
+
+### 用户沟通硬约束
+
+项目所有对外说明必须使用通俗、完整、容易复述的中文。先说结论，再用简单的话解释术语和证据；同时明确已完成、未完成、阻塞原因、下一步单一动作，以及 GPU/`locked_test` 边界。不能只给缩写、文件路径或难懂的理论句子，让没有参与项目的人无法理解。该要求与理论—实现—数据—指标一致性同级，长期有效。
+
+### 老师原话（逐字记录）
+
+> “信息边特征可以不用这么多，就是可以考虑在消息不是那么完整的情况下面做预测；然后真实数据集可能没办法涵盖所有的内容，每一个真实的数据集可能各有侧重，所以可以考虑用不同的数据集对不同的方面进行微调训练增强；然后就是方法，不能只通过实验结果来说明每个模块选择哪个方法，而是要说明为什么这个方法适合我们的课题场景；然后就是不同的方法要针对我们的场景有调参这个过程”
+
+### 对理论规范的约束化解释
+
+1. **部分观测优先**：信息边采用最小可靠字段集；未知值必须由 `null`、有效性 mask 和 MissingReason 表达，不得用零填充制造观测。模型和指标必须报告缺失条件下的行为。
+2. **多源数据分工**：真实数据集按其实际覆盖范围承担预训练、微调、迁移或外部验证中的一种或多种角色。接入前必须完成字段语义、单位、时间尺度、缺失模式、split 和 source closure；不同数据集不得未经对齐直接拼成完整真值。
+3. **方法适配论证**：双图编码、动作条件世界模型和候选 rollout planner 的候选方法，必须在实验前分别说明其归纳偏置如何对应无线动态、严格双图、稀疏事件、任务 DAG、硬约束和多步决策，并明确限制与可证伪指标。结果只能作为联合证据，不能替代理论理由。
+4. **场景化调参**：候选方法必须在统一数据、预算、seed、停止规则和主指标下调参；搜索空间、失败规则和消融在运行前冻结，不得看结果后扩展或改写协议。
+
+上述四项与本文件既有“理论—实现—数据—指标—证据一致”原则共同构成后续 P0–P10 的双约束主线。任何一项未闭合，相关方法只能标为 candidate/not implemented，不能进入方法冻结或 locked-test。
+
+### 当前模块的论文锚点与统一命名
+
+为避免 PPT、代码和论文各用一套名字，后续统一按下面三层来写：论文已有方法、PI-JWM 的场景化改造名、当前证据状态。内部配置名（例如 `coupled_dual_gnn_residual`）只能作为代码标签，不能单独当作论文方法名。
+
+| 模块 | 论文已有方法/依据 | PI-JWM 统一名称 | 当前状态与边界 |
+| --- | --- | --- | --- |
+| 双图表示 | 交互网络/双层网络（Yağan 等，IEEE TPDS 2012）；无线图神经网络（Shen 等，IEEE JSAC 2021）；Edge-conditioned message passing（Simonovsky 等，CVPR 2017） | **Strict Physical–Information Coupled Dual-Graph Message Passing**（严格物理—信息耦合双图消息传递） | 已有可运行候选和消融；这是 PI-JWM 对论文思想的组合改造，不是某一篇论文的原样复现 |
+| 世界模型 | World Models（2018）的动作条件 latent 动力学；PlaNet/RSSM（2019）的先验/后验状态空间模型；Dreamer（2020）的 latent imagination；TD-MPC2（2024）的任务相关短视野模型预测 | **Action-Conditioned Coupled Dual-Graph Recurrent World Model with Deterministic Rule Layer**（带确定性规则层的动作条件耦合双图循环世界模型） | 当前是 aggregate non-locked candidate。上周 PPT 的 **Graph-RSSM** 只能保留为历史工作候选；当前正式代码没有完整 RSSM 所需的严格历史先验/当前观测后验分工和 KL 证据，因此不能直接称“完整 RSSM” |
+| 候选规划 | PlaNet 的模型预测规划/CEM、Dreamer 的 latent imagination、TD-MPC2 的短视野 MPC；MBPO/MOPO/COMBO 提醒模型偏差和分布外动作风险 | **Candidate-Action World-Model Rollout Planner**（候选动作世界模型滚动规划器） | 当前只有 CPU `prototype_only` 接口，正式审计仍 `blocked`；必须完成逐候选 rollout、未来后果比较、首动作执行和反馈重规划后才能升级为正式方法 |
+| 下游策略器（非核心模块） | Actor–Critic、Clipped PPO | **Masked Actor–Critic / Clipped PPO policy candidates** | 只是第三模块的策略候选/对照，不是第四个核心模块；最终是否保留要等 P5/P6 正式闭环和公平调参 |
+
+因此，PI-JWM 的核心模块固定为前三行；后续回答“用了什么方法”时，先说统一名称，再用括号说明论文来源和当前状态。不能只报内部类名，也不能因为名字里有 RSSM 就默认实现已经是完整 RSSM。
+
+> **2026-08-03修订状态：** 按老师“通信相关内容进入信息图”的要求重新固定双图口径。物理图只描述真实硬件实体及其空间、运动和环境关系；无线/有线通信链路、CSI、信道增益、干扰、SINR、RB、速率和吞吐量统一属于信息图。信息图节点为附着于物理设备的通信/计算/服务代理，信息图边为代理之间具有真实端点的通信链路；任务、DAG和数据流作为业务辅助对象，不替代信息节点或通信边。现有AirFogSim原始轨迹、动作日志、数据划分和评价代码可以复用，但2026-08-03之前按“信道属于物理图、信息流作为信息边”训练的模型与结果只保留为过渡语义历史基线，不能作为本修订定义下的正式结果。
+
+## 文档真值规则
+
+本文件中的“固定”表示研究定义和必须满足的接口，不自动表示代码已经完成。每个方法性主张必须同时具有：明确输入输出、对应代码路径、针对性测试、机器可读产物和验收结果。只有名称、流程图、张量形状、模块导入、checkpoint可加载或短时smoke，均不能证明理论方法已经实现。
+
+尤其固定以下判定：策略器读取世界模型的latent或belief，只能称为“belief-conditioned policy”；只有对每个合法候选动作或动作序列实际执行世界模型动作条件rollout，并以预测的未来显式状态、任务结果、系统代价和风险完成比较，才可以称为“基于世界模型候选rollout的规划器”。二者不得混称。
+
+当前已核查但尚未满足本文件目标定义的实现差异统一进入`8.12之后推进.md`作为阻断项。差异关闭前，相关旧结果只能作为阶段接口证据，不得升级为最终方法证据。
+
+## 一、研究场景与核心问题
+
+### 1. 研究场景与系统实体
+
+PI-JWM面向基础设施辅助的动态空地协同移动边缘计算网络。系统由车辆、无人机（UAV）、路侧单元（RSU）和边缘计算节点组成，节点、无线链路、任务以及通信、计算、存储和能量资源均随时间变化。
+
+当前不预设系统为cell-free网络。PI-JWM只要求异构节点之间存在动态可行连接，并允许任务在合法计算节点之间卸载；只有后续数据与协议明确包含多接入点联合服务时，才把cell-free作为具体实验场景。
+
+| 系统实体 | 主要职责 | 在PI-JWM中的角色 |
+| --- | --- | --- |
+| 车辆 | 产生任务、发送数据、接收结果，可选提供车载计算 | 移动物理节点、任务源和候选计算节点 |
+| UAV | 提供空中通信、计算或感知服务 | 移动物理节点、候选通信节点和候选计算节点 |
+| RSU | 提供固定接入、转发和边缘计算 | 固定物理节点和基础设施计算节点 |
+| 边缘服务器 | 执行任务并维护计算、存储和队列资源 | 可与车辆、UAV或RSU共址的资源拥有者 |
+| 云节点 | 在具有真实路径和时延模型时提供远端计算 | 可选计算节点 |
+| 逻辑调度器 | 生成候选动作、检查可行性并滚动决策 | PI-JWM的下游使用者，不属于世界模型本体 |
+
+### 2. 网络组织与双图关系
+
+系统采用逻辑集中式、物理异构的控制组织。逻辑集中式只表示调度器能够在一个决策周期内汇总核心观测并比较候选动作，不要求数据永久汇聚到固定RSU，也不排除后续采用分层或分布式实现。
+
+物理图回答“真实设备在哪里、如何运动、具有什么硬件以及彼此具有怎样的空间和环境关系”；信息图回答“设备上的通信/计算/服务代理如何连接、链路状态如何、承载什么数据以及使用哪些通信资源”。无线和有线链路及其信道、协议和传输结果统一进入信息图。任务、DAG和数据流属于业务辅助结构：它们决定链路上是否存在待服务负载，但不替代信息节点或通信链路。卸载动作改变任务的执行代理和输入流目的端，RB动作改变信息链路获得的无线资源；两者都不创建物理实体或物理空间关系。
+
+### 3. 核心控制切片与变量角色
+
+当前核心控制切片固定为任务卸载目标选择和无线RB分配。前者决定任务由哪个合法信息代理承接计算，并据此创建或更新源代理到执行代理的输入流；后者决定待服务数据流在对应信息链路上使用哪些RB。二者共同改变通信服务、计算负载和任务进度，但不改变物理设备及其空间关系。逐任务、逐数据流和逐信息链路动作变量在第二部分统一定义。
+
+CSI、信道增益、路径损耗、SINR、链路可用性和历史链路速率属于信息边状态或观测，不属于动作。CPU硬件容量属于物理设备属性；CPU占用、计算队列和剩余计算量属于信息代理及资源状态。当前CPU分配不作为核心动作，而是在每个卸载与RB候选执行通信更新后，根据候选实际形成的可计算任务集合、任务剩余工作量和节点容量调用同一确定性工作守恒规则。该规则必须在每个候选、每个rollout步真实执行并更新后继状态，不能把CPU写成与候选无关的常量。
+
+| 类型 | 当前处理 |
+| --- | --- |
+| 核心可控量 | 任务卸载目标、无线RB分配 |
+| 外生过程 | 车辆移动、UAV既定运动、任务到达 |
+| 随机过程 | 传播、遮挡、快衰落、干扰和执行噪声 |
+| 固定机制 | 候选通信后执行的确定性CPU工作守恒规则、功率、MCS、返回路由和协议参数 |
+| 可选扩展 | CPU控制、功率控制、UAV轨迹、缓存、切片和mission分配 |
+
+### 4. 适用边界与扩展原则
+
+新动作只有在具有可核验动作日志、真实生效、后果可测、数据支持充分且能够回答新研究问题时才进入扩展版本。扩展只增加动作分量、约束和实验，不改变严格双图、动作条件动力学和规划接口。
+
+系统以离散周期$\Delta t$观测和决策，并在有限时域$K$内评价候选动作后果。$\Delta t$、$K$及不同预测时域属于实验配置；具体数值和执行事实统一记录在《8.12之后推进》的对应实验条目。
+
+本研究不把AirFogSim视为PI-JWM框架，不把调度器视为世界模型，也不把单纯CSI预测或无动作的自然演化预测等同于PI-JWM。只有带有时间对齐的状态、实际动作和后继结果，并能独立执行硬约束与安全回退的场景，才属于当前适用范围。
+
+### 5. PI-JWM研究目标与作用
+
+PI-JWM需要回答的核心问题是：
+
+> 能否根据历史物理—信息观测、已执行动作和当前外生上下文，构造保持严格双图结构的belief，并学习卸载与RB动作条件下的联合动力学，从而可靠预测候选动作对未来物理链路、任务演化和资源状态的影响？
+
+该问题包含四个紧密相连的方面：
+
+1. 分别表示设备—空间关系物理图与代理—通信链路信息图，并通过代理附着、信息边—物理端点对应和流—链路关系进行严格耦合；
+2. 区分卸载、RB动作引起的可控变化与移动、业务到达、信道随机性引起的外生变化；
+3. 在多步rollout中保持图合法性、任务阶段、资源容量和守恒约束，并输出可校准的不确定性；
+4. 检查较好的状态预测能否改善候选动作评价，而不是只降低平均RMSE。
+
+PI-JWM是动作条件世界模型，不是动作生成器、优化器或仿真器。完整闭环中的职责为：
+
+| 模块 | 职责 |
+| --- | --- |
+| 数据源或真实系统 | 提供时间对齐的状态—动作—结果轨迹 |
+| 候选动作生成器 | 提出卸载与RB候选动作 |
+| 可行性与安全层 | 排除违反硬约束或超出支持范围的动作 |
+| PI-JWM | 预测候选动作对应的未来联合状态、结果与不确定性 |
+| 规划器 | 根据预测代价和风险选择动作 |
+| 执行环境 | 执行动作并返回新观测 |
+
+研究顺序固定为：先建立可信的联合状态预测，再验证动作排序与决策接口，最后评价闭环系统收益。状态预测、动作排序和系统收益使用不同指标，不能合并成单一链路速率RMSE。
+
+## 二、严格双图联合系统模型
+
+### 1. 时间尺度、因果顺序与变量分类
+
+| 符号 | 严格定义 |
+| --- | --- |
+| $\mathcal T=\{0,\ldots,T-1\}$ | 离散决策时刻集合，$T$为总步数 |
+| $t,\tau\in\mathcal T$ | 当前时刻与历史时刻索引 |
+| $H$ | 历史观测窗口长度 |
+| $K$ | 多步rollout长度，$k\in\{1,\ldots,K\}$为预测步索引 |
+| $\Delta t$ | 相邻决策时刻之间的物理时间 |
+
+时刻$t$使用$\tau\in\{t-H+1,\ldots,t\}$的历史信息预测$t+1$至$t+K$，因此要求$t\ge H-1$且$t+K\le T-1$。集合之间的“$\times$”均表示笛卡尔积，不表示数值乘法。
+
+**（1）因果时序与决策边界。**
+
+| 符号 | 严格定义 |
+| --- | --- |
+| $\mathbf o_t^{PI}$ | 时刻$t$实际可获得的物理—信息联合观测 |
+| $\mathbf h_t$ | 最近$H$步观测及此前已执行动作组成的历史 |
+| $\mathcal F_t^{\mathrm{dec}}$ | 选择动作前合法获得的决策信息集 |
+
+$$
+\mathbf h_t=
+\left(
+\mathbf o_{t-H+1:t}^{PI},
+\mathbf a_{t-H:t-1}^{\mathrm{core}}
+\right),
+\qquad
+\mathcal F_t^{\mathrm{dec}}
+=
+\sigma\!\left(
+\mathbf h_t,
+\mathbf c_{t:t+K-1}^{\mathrm{avail}}
+\right).
+$$
+
+单步因果顺序固定为
+
+$$
+\mathbf o_t^{PI}
+\rightarrow
+\mathbf h_t
+\rightarrow
+\mathbf b_t
+\rightarrow
+\mathbf a_t^{\mathrm{core}}
+\rightarrow
+\mathbf s_{t+1}^{PI}
+\rightarrow
+\mathbf o_{t+1}^{PI}.
+$$
+
+$\mathbf a_t^{\mathrm{core}}$只能依赖$\mathcal F_t^{\mathrm{dec}}$并作用于$[t,t+1)$。未来真实状态、真实CSI、真实任务到达和动作执行结果只能作为标签，不能进入时刻$t$的输入。不同数据源的内部事件顺序统一在上述决策边界对齐；具体仿真器执行顺序及其核验结果记录在《8.12之后推进》。
+
+**（2）可控量、外生量与随机扰动。**
+
+| 类型 | 符号 | 当前定义 |
+| --- | --- | --- |
+| 核心动作 | $\mathbf a_t^{\mathrm{core}}$ | 卸载目标选择和无线RB分配 |
+| 外生上下文 | $\mathbf c_t$ | 决策时可观测或可因果预测的移动、业务与场景条件 |
+| 固定机制 | $\boldsymbol\vartheta^{\mathrm{fix}}$ | CPU规则、固定路由、功率、MCS和协议参数 |
+| 随机创新 | $\mathbf w_{t+1}$ | 下一步才揭示的任务到达、快衰落、干扰和执行噪声 |
+
+卸载动作直接改变选定执行代理，RB动作直接改变信息通信边获得的无线资源。队列、任务进度和资源占用是动作后果；移动、任务到达和随机信道不是当前核心动作。完整转移关系在本部分末尾统一定义。
+
+### 2. 观测、显式状态与latent belief
+
+| 符号 | 严格定义 |
+| --- | --- |
+| $\mathbf s_t^{PI}$ | 理论上足以决定下一步分布的完整严格双图联合状态 |
+| $p_O^\star$ | 真实观测模型 |
+| $\mathbf o_t^{PI}$ | 由完整状态产生的缺失、带噪或延迟观测 |
+
+$$
+\mathbf o_t^{PI}
+\sim
+p_O^\star\!\left(
+\mathbf o_t^{PI}\mid\mathbf s_t^{PI}
+\right).
+$$
+
+完整状态的Markov要求为
+
+$$
+p^\star\!\left(
+\mathbf s_{t+1}^{PI}
+\mid
+\mathbf s_{0:t}^{PI},
+\mathbf a_{0:t}^{\mathrm{core}},
+\mathbf c_{0:t}
+\right)
+=
+p^\star\!\left(
+\mathbf s_{t+1}^{PI}
+\mid
+\mathbf s_t^{PI},
+\mathbf a_t^{\mathrm{core}},
+\mathbf c_t
+\right).
+$$
+
+该等式是完整状态的定义要求，不是现有数据自动满足的结论。单帧$\mathbf o_t^{PI}$通常不满足Markov性，因此PI-JWM使用$\mathbf h_t$而不是把一帧节点—边特征直接当作真实状态。仿真器内部变量只能作为特权监督或审计字段。
+
+**（1）显式状态、latent belief与不确定性。**
+
+| 符号 | 严格定义 |
+| --- | --- |
+| $\mathbf s_t^{PI,\mathrm{exp}}$ | 由时刻$t$合法观测确定构造的显式双图状态 |
+| $\mathcal E^{PI}$ | 观测清洗、掩码、派生和图构造过程 |
+| $\mathcal B_t$ | 给定历史后完整状态的理论后验分布 |
+| $\mathbf b_t$ | PI-JWM学习得到的有限维latent belief |
+| $q_\phi$ | belief推断模型 |
+| $\mathcal D_\psi$ | 从隐式状态与规则层结果生成可解释显式状态的分类型预测头集合 |
+| $\widehat{\mathbf u}_{t+1:t+K}$ | 概率、协方差、分位数、校准区间和OOD风险等不确定性输出 |
+
+$$
+\mathbf s_t^{PI,\mathrm{exp}}
+=
+\mathcal E^{PI}(\mathbf o_t^{PI}),
+\qquad
+\mathcal B_t
+=
+p^\star(\mathbf s_t^{PI}\mid\mathbf h_t),
+\qquad
+\mathbf b_t
+\sim
+q_\phi(\mathbf b_t\mid\mathbf h_t).
+$$
+
+$\mathbf s_t^{PI,\mathrm{exp}}$只含可追溯的显式字段；$\mathbf b_t$压缩未观测传播、队列和历史动作记忆，不能解释为新的物理传感量。若两段历史得到相同显式状态但具有不同未来分布，就发生状态别名；模型无法消除的歧义必须由$\widehat{\mathbf u}_{t+1:t+K}$表达。
+
+**双状态生成是PI-JWM的固定接口。** 当前时刻同时生成两种状态：显式状态由协议字段直接构造，隐式状态由观测—动作历史推断。未来第$k$步先进行动作条件隐式转移，再由分类型预测头生成对应的未来显式状态：
+
+$$
+\mathbf b_t\sim q_\phi(\mathbf b_t\mid\mathbf h_t),
+\qquad
+\widehat{\mathbf b}_{t+k}^{-}
+\sim
+p_\theta\!\left(
+\widehat{\mathbf b}_{t+k-1}^{-},
+\mathbf a_{t+k-1}^{\mathrm{core}},
+\widehat{\mathbf s}_{t+k}^{PI,\mathrm{det}}
+\right),
+$$
+
+$$
+\widehat{\mathbf s}_{t+k}^{PI,\mathrm{exp}}
+=
+\mathcal D_\psi\!\left(
+\widehat{\mathbf b}_{t+k}^{-},
+\widehat{\mathbf s}_{t+k}^{PI,\mathrm{det}},
+\mathbf M_{t+k}^{\mathrm{tar}}
+\right).
+$$
+
+其中$\mathcal D_\psi$只生成数据协议允许且目标掩码有效的显式字段；阶段、动作写入和守恒量优先保留规则层结果。每个rollout步都同时保留$(\widehat{\mathbf s}_{t+k}^{PI,\mathrm{exp}},\widehat{\mathbf b}_{t+k}^{-})$：前者用于解释、硬约束检查和真实指标，后者用于历史记忆、部分可观测性和继续递归。只输出latent或只复制显式状态都不构成完整PI-JWM状态生成。
+
+文献依据：Kaelbling et al. (1998) 的POMDP状态、观测和belief边界，以及World Models、Dreamer和TD-MPC2的动作条件latent状态建模。
+
+### 3. 物理图定义
+
+时刻$t$的物理图定义为
+
+$$
+\mathcal G_t^P=(\mathcal V_t^P,\mathcal E_t^P),
+$$
+
+其中节点是真实硬件实体，边是实体之间的空间、运动或环境关系。物理图不再包含无线信道或有线通信链路。
+
+| 对象      | 符号                         | 完整定义                                       |
+| ------- | -------------------------- | ------------------------------------------ |
+| 车辆节点    | $v_i^{\mathrm{veh}}$       | 真实车辆硬件实体                                   |
+| UAV节点   | $v_i^{\mathrm{uav}}$       | 真实无人机硬件实体                                  |
+| RSU节点   | $v_i^{\mathrm{rsu}}$       | 真实路侧单元硬件实体                                 |
+| 独立MEC节点 | $v_i^{\mathrm{mec}}$       | 与车辆、UAV、RSU不共址时单独建模的边缘服务器；共址时只记录为宿主设备的硬件容量 |
+| 云基础设施节点 | $v_i^{\mathrm{cloud}}$     | 仅在数据源提供真实实体、位置或可核验基础设施身份时保留的远端硬件节点         |
+| 物理节点集合  | $\mathcal V_t^P$           | 时刻$t$存在且可用的上述真实硬件节点集合                      |
+| 物理邻接边   | $e_{ij,t}^P=(v_i^P,v_j^P)$ | 节点$i$到节点$j$的有序空间、运动和环境关系；不表示正在通信或一定能够通信    |
+| 物理边集合   | $\mathcal E_t^P$           | 由冻结邻域规则或数据源真实空间关系形成的物理邻接边集合                |
+
+物理节点特征固定为
+
+$$
+\mathbf x_{i,t}^{P,N}
+=
+\left[
+\operatorname{onehot}(\kappa_i^P)
+\,\|\,
+\zeta_{i,t}^P
+\,\|\,
+\mathbf p_{i,t}^P
+\,\|\,
+\mathbf v_{i,t}^P
+\,\|\,
+\boldsymbol\alpha_{i,t}^P
+\,\|\,
+\psi_{i,t}^P
+\,\|\,
+E_{i,t}^P
+\,\|\,
+C_i^{\mathrm{cpu}}
+\,\|\,
+C_i^{\mathrm{mem}}
+\right],
+$$
+
+其中$\kappa_i^P$、$\zeta_{i,t}^P$、$\mathbf p_{i,t}^P$、$\mathbf v_{i,t}^P$、$\boldsymbol\alpha_{i,t}^P$、$\psi_{i,t}^P$、$E_{i,t}^P$、$C_i^{\mathrm{cpu}}$和$C_i^{\mathrm{mem}}$依次表示设备类型、存在可用状态、位置、速度、加速度、航向、剩余能量、安装的CPU容量和安装的存储容量。任务队列、CPU分配量和通信队列不写入物理节点特征。
+
+物理边存在规则固定为
+
+$$
+\mathcal E_t^P
+=
+\left\{
+(i,j)\mid i\neq j,\ \zeta_{i,t}^P\zeta_{j,t}^P=1,\ r_{ij,t}^P=1
+\right\},
+$$
+
+其中$r_{ij,t}^P$由版本化数据协议中的邻域半径、$k$近邻或数据源空间关系之一确定，同一数据版本不得混用多种规则。物理边特征为
+
+$$
+\mathbf x_{ij,t}^{P,E}
+=
+\left[
+\Delta\mathbf p_{ij,t}^P
+\,\|\,
+d_{ij,t}^P
+\,\|\,
+\Delta\mathbf v_{ij,t}^P
+\,\|\,
+\theta_{ij,t}^P
+\,\|\,
+\phi_{ij,t}^P
+\,\|\,
+l_{ij,t}^{\mathrm{LoS}}
+\,\|\,
+o_{ij,t}^{\mathrm{block}}
+\right].
+$$
+
+$\Delta\mathbf p_{ij,t}^P$、$d_{ij,t}^P$、$\Delta\mathbf v_{ij,t}^P$、$\theta_{ij,t}^P$、$\phi_{ij,t}^P$、$l_{ij,t}^{\mathrm{LoS}}$和$o_{ij,t}^{\mathrm{block}}$分别表示相对位置、距离、相对速度、方位角、高度角、视距状态和遮挡状态。AirFogSim未提供的LoS或遮挡字段必须使用缺失掩码，不得由零值或距离阈值伪造。
+
+**严格边界。** CSI、信道增益、路径损耗、干扰、噪声、SINR、RB、发射功率、MCS、速率、吞吐量和已服务数据量全部属于信息图通信边，不属于物理图。存在物理边只表示两个实体具有可建模的物理空间关系，不表示通信链路存在、被调度或成功传输。
+### 4. 信息图定义
+
+时刻$t$的信息图定义为
+
+$$
+\mathcal G_t^I=(\mathcal V_t^I,\mathcal E_t^I),
+$$
+
+其中节点是附着在真实设备上的通信、计算或服务代理，边是代理之间具有真实端点的无线或有线通信链路。
+
+| 对象 | 符号 | 完整定义 |
+| --- | --- | --- |
+| 通信代理 | $u_{i,t}^{\mathrm{comm}}$ | 附着于设备$i$并维护通信接口、链路观测和通信队列的逻辑实体 |
+| 计算代理 | $u_{i,t}^{\mathrm{comp}}$ | 附着于设备$i$并维护计算队列、执行状态和CPU分配结果的逻辑实体 |
+| 服务代理 | $u_{i,t}^{\mathrm{serv}}$ | 附着于设备$i$并维护任务接收、结果返回、deadline和优先级状态的逻辑实体 |
+| 复合信息代理 | $u_i^I$ | 首版实现中将同一设备上的通信、计算和服务代理合并得到的单个信息节点 |
+| 信息节点集合 | $\mathcal V_t^I$ | 时刻$t$所有有效通信、计算、服务或复合代理的集合 |
+| 通信链路 | $e=(u,v,k)\in\mathcal E_t^I$ | 源代理$u$到目的代理$v$经接口或链路类型$k$形成的有向通信边；同一端点对允许多接口平行边 |
+| 数据流 | $f\in\mathcal F_t$ | 具有`flow_id`、源代理、目的代理、类型、总量、剩余量和阶段的业务负载对象；不是信息图通信边本身 |
+| 任务图 | $\mathcal H_m^T$ | 任务$m$的子任务与先后依赖辅助图；不作为信息图节点或通信边 |
+
+首版复合代理集合为
+
+$$
+\mathcal V_t^I
+=
+\left\{
+u_i^I\mid v_i^P\in\mathcal V_t^P
+\right\}.
+$$
+
+信息节点特征固定为
+
+$$
+\mathbf x_{u_i,t}^{I,N}
+=
+\left[
+\operatorname{Queue}_{i,t}^{\mathrm{unassigned}}
+\,\|\,
+\operatorname{Queue}_{i,t}^{\mathrm{tx}}
+\,\|\,
+\operatorname{Backlog}_{i,t}^{\mathrm{cpu}}
+\,\|\,
+\operatorname{Running}_{i,t}
+\,\|\,
+\operatorname{Queue}_{i,t}^{\mathrm{return}}
+\,\|\,
+\operatorname{Summary}_{i,t}^{\mathrm{ddl,pri}}
+\right].
+$$
+
+每条信息边$e=(u,v,k)$的字段按照决策因果顺序分成三组：
+
+$$
+\mathbf x_{e,t}^{I,E}
+=
+\left[
+\mathbf x_{e,t}^{I,\mathrm{pre}}
+\,\|\,
+\mathbf x_{e,t}^{I,\mathrm{act}}
+\,\|\,
+\mathbf x_{e,t}^{I,\mathrm{out}}
+\right].
+$$
+
+| 字段组 | 符号 | 字段 |
+| --- | --- | --- |
+| 决策前链路状态 | $\mathbf x_{e,t}^{I,\mathrm{pre}}$ | 链路类型、端点、接口可用性、CSI、信道增益、路径损耗、噪声、历史干扰、历史SINR、历史速率 |
+| 动作或固定配置 | $\mathbf x_{e,t}^{I,\mathrm{act}}$ | RB分配、发射功率、MCS；当前只有RB属于核心动作，功率和MCS为固定配置 |
+| 动作后链路结果 | $\mathbf x_{e,t}^{I,\mathrm{out}}$ | 实际干扰、实际SINR、链路活动、速率、outage、吞吐量、已服务数据量 |
+
+信息边是否存在由真实端点、接口兼容性和数据源可核验链路共同决定，不由当前是否有任务、是否分配RB或本时隙速率是否为零决定。任务卸载、结果回传和DAG依赖释放形成数据流$\mathcal F_t$；数据流通过链路—流关系$\mathbf C_t^{FL}$加载到信息边：
+
+$$
+[\mathbf C_t^{FL}]_{f,e}=1
+\iff
+\text{数据流$f$在时隙$t$由通信链路$e$承载或等待该链路服务}.
+$$
+
+因此，信息图的节点和边都具有真实设备代理端点；任务ID只作为数据流标签，DAG边只表达业务依赖。没有数据流时通信链路仍可存在；有待传数据流但没有RB时数据流保持pending且服务量为零。
+### 5. 跨图耦合关系
+
+联合系统定义为
+
+$$
+\mathcal G_t^{PI}
+=
+\left(
+\mathcal G_t^P,
+\mathcal G_t^I,
+\mathcal R_t^{IP},
+\mathcal R_t^{EP}
+\right).
+$$
+
+双图只保留两类可核验跨图关系：
+
+| 耦合关系 | 符号 | 严格定义 |
+| --- | --- | --- |
+| 信息代理—物理设备附着 | $\mathbf C_t^{IP}$ | $[\mathbf C_t^{IP}]_{ui}=1$表示信息代理$u$部署在物理设备$i$上 |
+| 信息通信边—物理关系对应 | $\mathbf C_t^{EP}$ | $[\mathbf C_t^{EP}]_{e,(i,j)}=1$表示信息边$e=(u_i,u_j,k)$的端点对应物理节点对$(i,j)$及其空间环境关系 |
+
+首版每个信息代理唯一附着于一个物理设备：
+
+$$
+\sum_{i\in\mathcal V_t^P}[\mathbf C_t^{IP}]_{ui}=1.
+$$
+
+若信息边$e=(u,v,k)$存在，令$i=\pi_t(u)$、$j=\pi_t(v)$，则其物理端点必须与附着关系一致：
+
+$$
+[\mathbf C_t^{EP}]_{e,(i,j)}=1
+\Rightarrow
+[\mathbf C_t^{IP}]_{ui}=1
+\land
+[\mathbf C_t^{IP}]_{vj}=1.
+$$
+
+构图协议必须保证每条信息通信边都能回指到唯一的有序物理端点对；若信息链路端点之间需要物理上下文而当前邻域规则没有产生$(i,j)$，则该数据版本必须扩充物理邻域，不能由神经网络用全连接attention隐式补造关系。
+
+跨图作用是双向的，但含义不同：
+
+- **物理到信息：** 位置、相对运动、LoS/遮挡、剩余能量和硬件容量为通信链路与服务状态提供条件；
+- **信息到物理：** 实际通信、计算与调度结果形成能耗和设备负载反馈，更新下一时隙物理节点状态；
+- **业务到信息：** 数据流—链路关系$\mathbf C_t^{FL}$和任务—代理关系$\mathbf C_t^{TI,q}$只属于信息/业务层辅助索引，不是第三类跨图耦合。
+
+旧定义中的“信息流—物理边承载”$\mathbf C_t^{FE}$自2026-08-03起停用。原因是无线信道已经归入信息边，数据流由$\mathbf C_t^{FL}$加载到信息通信边；真正跨越物理图与信息图的是代理附着$\mathbf C_t^{IP}$和信息边端点的物理关系对应$\mathbf C_t^{EP}$。
+
+**文献锚点与定义边界。** Yağan等在IEEE TPDS 2012论文[Optimal Allocation of Interconnecting Links in Cyber-Physical Systems](https://doi.org/10.1109/TPDS.2012.62)中把网络化CPS表示为两个各自具有节点和层内边的交互网络，并用显式跨网络连接/依赖矩阵表示层间关系；这直接支撑“物理图、信息图分别定义，再以$\mathbf C_t^{IP}$和$\mathbf C_t^{EP}$显式耦合”的结构原则，但不直接规定本文物理边必须采用哪一种空间邻域规则。Shen等在IEEE JSAC 2021论文[Graph Neural Networks for Scalable Radio Resource Management](https://doi.org/10.1109/JSAC.2020.3036965)中将无线RRM写成图优化问题，并把信道状态作为无线通信图的边特征；因此PI-JWM将CSI、信道增益、干扰、SINR和速率放在信息通信边，而不再放入物理图。两篇论文都没有原样定义PI-JWM的复合信息代理、任务/DAG辅助结构或动作条件世界模型；这些是面向移动边缘场景的组合实例化，必须继续通过单图/双图、无耦合和打乱耦合关系等消融验证，不能写成文献已经证明的最优划分。
+
+**单时隙因果顺序。** 时刻$t$先使用合法观测构造物理图、决策前信息图、任务/DAG和资源状态，再选择卸载与RB动作；动作在$[t,t+\Delta t)$内执行，产生实际干扰、SINR、速率、数据流服务量、计算服务量和能耗，最后形成$t+1$状态。动作后的结果不得反向进入时刻$t$的决策前图特征。
+### 6. 任务生命周期与任务动力学
+
+| 符号 | 严格定义 |
+| --- | --- |
+| $\mathcal M,\mathcal M_t$，$m,n$ | 全部任务、时刻$t$已到达且未终止的活动任务及其索引 |
+| $\mathbf d_m^{M,\mathrm{stat}}$ | 任务类型、到达、输入量、计算量、输出量、deadline和优先级等静态属性 |
+| $\ell_{m,t}$，$\mathbf r_{m,t}^{M,\mathrm{rem}}$ | 任务生命周期及输入、计算、输出三类剩余量 |
+| $\mathcal H_m^T$，$\Gamma_m^{T,-}$ | 任务$m$的可选子任务DAG及当前子任务的直接前驱集合 |
+| $r_{m,t}^{\mathrm{ready}}$ | 任务$m$的全部直接前驱条件是否满足 |
+| $\Delta D_{m,t}^{\mathrm{in}}$ | 本时隙真正到达执行节点的输入数据量 |
+| $\Delta W_{m,t}^{\mathrm{cpu}}$ | 本时隙完成的计算工作量 |
+| $\Delta D_{m,t}^{\mathrm{out}}$ | 本时隙真正到达结果接收节点的输出数据量 |
+| $\Delta D_{mn,t}^{\mathrm{dep}}$ | 本时隙真正到达后继任务承载节点的依赖数据量 |
+
+$$
+r_{m,t}^{\mathrm{ready}}
+=
+\prod_{n\in\Gamma_m^{T,-}}
+\sigma_{nm,t}^T,
+$$
+
+空前驱集合采用空乘积$r_{m,t}^{\mathrm{ready}}=1$。三类任务剩余量统一更新为
+
+$$
+\mathbf r_{m,t+1}^{M,\mathrm{rem}}
+=
+\left[
+\mathbf r_{m,t}^{M,\mathrm{rem}}
+-
+\begin{bmatrix}
+\Delta D_{m,t}^{\mathrm{in}}\\
+\Delta W_{m,t}^{\mathrm{cpu}}\\
+\Delta D_{m,t}^{\mathrm{out}}
+\end{bmatrix}
+\right]^+,
+$$
+
+若$\mathcal H_m^T$包含跨代理依赖，依赖数据对应的信息流$f_{nm}$按统一信息流剩余量更新：
+
+$$
+D_{f_{nm},t+1}^{\mathrm{rem}}
+=
+\left[
+D_{f_{nm},t}^{\mathrm{rem}}
+-
+\Delta D_{mn,t}^{\mathrm{dep}}
+\right]^+.
+$$
+
+生命周期顺序为等待/就绪、输入传输、计算、结果回传、完成或失败。每个服务增量只统计端到端真正推进任务阶段的量，不能把多跳路径各跳数据量相加后重复计数。阶段合法性、deadline和失败条件作为确定性更新规则进入本部分末尾的动作条件转移。
+
+### 7. 资源状态
+
+| 符号 | 严格定义 |
+| --- | --- |
+| $\mathcal B$，$b\in\mathcal B$ | 无线RB集合及索引 |
+| $\bar F_i,F_{i,t}^{\mathrm{use}},F_{i,t}^{\mathrm{rem}}$ | 节点CPU容量、占用量和剩余量 |
+| $\bar S_i,S_{i,t}^{\mathrm{use}},S_{i,t}^{\mathrm{rem}}$ | 节点存储容量、占用量和剩余量 |
+| $E_i^{\max},E_{i,t},\Delta E_{i,t}$ | 最大能量、剩余能量和时隙能耗 |
+| $L_{b,t}^{\mathrm{RB}}$ | RB $b$上的活动传输数 |
+| $\mathbf S_t^R$ | 完整资源状态 |
+
+$$
+F_{i,t}^{\mathrm{rem}}=\bar F_i-F_{i,t}^{\mathrm{use}},
+\qquad
+S_{i,t}^{\mathrm{rem}}=\bar S_i-S_{i,t}^{\mathrm{use}},
+\qquad
+E_{i,t+1}=[E_{i,t}-\Delta E_{i,t}]^+,
+$$
+
+并满足
+
+$$
+0\le F_{i,t}^{\mathrm{use}}\le\bar F_i,
+\qquad
+0\le S_{i,t}^{\mathrm{use}}\le\bar S_i,
+\qquad
+0\le E_{i,t}\le E_i^{\max}.
+$$
+
+$$
+L_{b,t}^{\mathrm{RB}}
+=
+\sum_{f\in\mathcal F_t}
+\sum_{e\in\mathcal E_t^{I,W}}
+a_{f,e,b,t}^{\mathrm{RB}}.
+$$
+
+$L_{b,t}^{\mathrm{RB}}>1$表示空间复用，需要计算同频干扰，不预设全局正交。节点不适用的存储或能量分量使用掩码，未知容量不能写成零容量。
+
+$$
+\mathbf S_t^R
+=
+\left(
+\{(\bar F_i,F_{i,t}^{\mathrm{use}},F_{i,t}^{\mathrm{rem}},
+\bar S_i,S_{i,t}^{\mathrm{use}},S_{i,t}^{\mathrm{rem}},
+E_i^{\max},E_{i,t})\}_{i\in\mathcal N},
+\{L_{b,t}^{\mathrm{RB}}\}_{b\in\mathcal B}
+\right).
+$$
+
+资源状态附着于物理节点或全局RB池，不构成第三张图。
+
+### 8. 联合调度动作
+
+| 符号 | 严格定义 |
+| --- | --- |
+| $\mathcal M_t^{\mathrm{off}}$ | 等待选择执行代理的任务集合 |
+| $a_{mi,t}^{\mathrm{off}}$ | 是否为任务$m$选择物理设备$i$上的计算代理执行 |
+| $a_{f,e,b,t}^{\mathrm{RB}}$ | 是否给数据流$f$在信息通信边$e$上分配RB $b$ |
+| $\mathbf a_t^{\mathrm{core}}$ | 当前核心联合动作$\left(\mathbf a_t^{\mathrm{off}},\mathbf a_t^{\mathrm{RB}}\right)$ |
+| $\mathbb A_t^{\mathrm{feas}}$ | 满足阶段、信息链路和资源硬约束的核心动作可行域 |
+| $\mu_{\mathrm{wc}}^{\mathrm{cpu}}$，$f_{mi,t}^{\mathrm{cpu}}$ | 候选通信后执行的确定性CPU工作守恒规则及其服务率输出 |
+| $y_{e,b,t}^{\mathrm{tx}}$ | 信息通信边$e$在RB $b$上是否存在活动传输 |
+| $\Delta D_{f,e,t}^{\mathrm{tx}}$ | 数据流$f$在信息通信边$e$上获得的传输服务量 |
+
+$$
+\mathbf a_t^{\mathrm{core}}
+=
+\left(
+\mathbf a_t^{\mathrm{off}},
+\mathbf a_t^{\mathrm{RB}}
+\right)
+\in
+\mathbb A_t^{\mathrm{feas}},
+\qquad
+\sum_{i\in\mathcal V_t^P}a_{mi,t}^{\mathrm{off}}=1.
+$$
+
+卸载动作写入任务—代理关系$q^{\mathrm{exec}}$，并在远端执行时创建或更新输入数据流；数据到达执行代理前不改变$q^{\mathrm{host}}$。RB动作只能服务已有数据流与已有信息通信边：
+
+$$
+a_{f,e,b,t}^{\mathrm{RB}}
+\le
+[\mathbf C_t^{FL}]_{f,e},
+\qquad
+f\in\mathcal F_t, e\in\mathcal E_t^I.
+$$
+
+信息链路活动、SINR、速率和服务量为
+
+$$
+y_{e,b,t}^{\mathrm{tx}}
+=
+\mathbb I\!\left[
+\sum_{f\in\mathcal F_t}a_{f,e,b,t}^{\mathrm{RB}}>0
+\right],
+$$
+
+$$
+\gamma_{e,b,t}
+=
+\frac{P_{e,b,t}g_{e,t}^{I}}
+{N_0+\sum_{e'\neq e}y_{e',b,t}^{\mathrm{tx}}P_{e',b,t}g_{e'\rightarrow d(e),t}^{I}},
+\qquad
+R_{e,b,t}=B_{\mathrm{RB}}\log_2(1+\gamma_{e,b,t}),
+$$
+
+$$
+\Delta D_{f,e,t}^{\mathrm{tx}}
+=
+\Delta t
+\sum_{b\in\mathcal B}
+a_{f,e,b,t}^{\mathrm{RB}}R_{e,b,t}.
+$$
+
+$g_{e,t}^{I}$和$g_{e'\rightarrow d(e),t}^{I}$分别表示目标信息边信道增益和并发信息边到目标接收端的干扰信道增益，均属于信息边状态。服务量先扣减数据流剩余量，再按流类型更新任务输入、依赖或结果状态。CPU不属于当前核心动作，但必须对每个候选通信后状态分别执行。令$\widetilde{\mathbf s}_{t}^{\mathrm{post\text{-}comm}}$表示应用候选卸载和RB动作并完成本时隙通信更新后的状态，则
+
+$$
+\mathbf f_t^{\mathrm{cpu}}
+=
+\mu_{\mathrm{wc}}^{\mathrm{cpu}}
+\left(
+\widetilde{\mathbf s}_{t}^{\mathrm{post\text{-}comm}};
+\boldsymbol\vartheta_{\mathrm{cpu}}^{\mathrm{fix}}
+\right),
+\qquad
+0\le f_{mi,t}^{\mathrm{cpu}}\le\frac{W_{m,t}^{\mathrm{rem}}}{\Delta t},
+\qquad
+\sum_m f_{mi,t}^{\mathrm{cpu}}\le\bar F_i.
+$$
+
+规则采用封顶均分的工作守恒分配：节点有未满足计算需求且总需求不小于容量时，分配总量等于节点容量；需求较小的任务先按剩余工作量封顶，剩余容量再确定性重分配。CPU规则不读取未来状态、未来结果、deadline、priority或策略输出，没有可训练权重。CPU控制、功率、MCS、UAV轨迹、返回路由、缓存和mission只作为后续扩展，不在当前动作空间中。
+### 9. 联合状态与动作条件转移
+
+完整联合状态同时保留显式双图、业务对象、资源状态和跨图关系：
+
+$$
+\mathbf s_t^{PI}
+=
+\Big(
+\mathbf A_t^P,
+\mathbf X_t^{P,N},
+\mathbf X_t^{P,E},
+\mathbf A_t^I,
+\mathbf X_t^{I,N},
+\mathbf X_t^{I,E},
+\mathbf X_t^{F},
+\mathbf C_t^{IP},
+\mathbf C_t^{EP},
+\mathbf C_t^{FL},
+\mathbf S_t^T,
+\mathbf S_t^R
+\Big).
+$$
+
+其中$\mathbf X_t^{P,N}$、$\mathbf X_t^{P,E}$编码物理实体及空间关系，$\mathbf X_t^{I,N}$、$\mathbf X_t^{I,E}$编码信息代理及通信链路，$\mathbf X_t^F$编码数据流，$\mathbf S_t^T$和$\mathbf S_t^R$分别编码任务/DAG和资源状态。动态节点、通信边、数据流和任务均带存在掩码；补零只用于批处理。
+
+真实系统满足
+
+$$
+\mathbf s_{t+1}^{PI}
+=
+F^\star
+\left(
+\mathbf s_t^{PI},
+\mathbf a_t^{\mathrm{core}},
+\mathbf c_t,
+\boldsymbol\vartheta^{\mathrm{fix}},
+\mathbf w_{t+1}
+\right).
+$$
+
+可由规则唯一确定的阶段、动作写入和守恒量先经$\mathcal U^{\mathrm{det}}$更新；无法精确计算的信道、服务、队列、能耗与到达扰动由PI-JWM学习：
+
+$$
+\mathbf s_{t+1}^{PI,\mathrm{det}}
+=
+\mathcal U^{\mathrm{det}}
+\left(
+\mathbf s_t^{PI,\mathrm{exp}},
+\mathbf a_t^{\mathrm{core}},
+\mathbf c_t;
+\boldsymbol\vartheta^{\mathrm{fix}}
+\right),
+$$
+
+$$
+\mathbf b_{t+1}^{-}
+\sim
+p_\theta
+\left(
+\mathbf b_{t+1}^{-}
+\mid
+\mathbf b_t,
+\mathbf a_t^{\mathrm{core}},
+\mathbf c_t,
+\mathbf s_{t+1}^{PI,\mathrm{det}}
+\right).
+$$
+
+部署时只使用观测—动作历史$\mathbf h_t$推断当前belief，不读取未来真实CSI、任务到达或动作结果。显式状态用于约束、评价与解释，latent belief用于处理部分可观测性和递归预测，两者不能互相替代。
+## 三、优化问题与学习目标
+
+### 1. 决策变量与可行域
+
+在每个决策时刻$t$，系统只优化第二部分已经定义的核心联合动作$\mathbf a_t^{\mathrm{core}}$。它由任务卸载目标选择和无线RB分配组成：
+
+| 决策分量 | 作用对象 | 决定的内容 |
+| --- | --- | --- |
+| $\mathbf a_t^{\mathrm{off}}$ | 等待卸载的任务与候选物理节点 | 每个任务选择哪个合法节点作为执行节点 |
+| $\mathbf a_t^{\mathrm{RB}}$ | 实际待服务数据流、信息通信边与RB | 哪条数据流在相应信息边上使用哪些RB |
+| $\mathbf a_t^{\mathrm{core}}=(\mathbf a_t^{\mathrm{off}},\mathbf a_t^{\mathrm{RB}})$ | 当前核心控制切片 | 时刻$t$实际需要求解的联合动作 |
+
+两个动作分量沿用第二部分的逐元素变量。其完整索引形式为
+
+$$
+\mathbf a_t^{\mathrm{off}}
+:=
+\left\{
+a_{mi,t}^{\mathrm{off}}
+\right\}_{
+m\in\mathcal M_t^{\mathrm{off}},\,
+i\in\mathcal N
+},
+$$
+
+$$
+\mathbf a_t^{\mathrm{RB}}
+:=
+\left\{
+a_{f,e,b,t}^{\mathrm{RB}}
+\right\}_{
+f\in\mathcal F_t,\,
+e\in\mathcal E_t^{I,W},\,
+b\in\mathcal B
+}.
+$$
+
+上述逐元素动作均为二元变量：
+
+$$
+a_{mi,t}^{\mathrm{off}},
+\quad
+a_{f,e,b,t}^{\mathrm{RB}}
+\in
+\{0,1\}.
+$$
+
+由这些二元变量组成、但尚未检查系统约束的集合称为原始核心动作空间：
+
+$$
+\mathbb A_t^{\mathrm{raw}}
+:=
+\left\{
+\mathbf a_t^{\mathrm{core}}
+\mid
+a_{mi,t}^{\mathrm{off}},
+a_{f,e,b,t}^{\mathrm{RB}}
+\in\{0,1\}
+\right\}.
+$$
+
+原始动作空间中的组合不一定能够执行。例如，一个动作可能把任务分配给不可用节点、在不存在的信息通信边上分配RB、违反任务阶段，或者超过资源容量。因此，引入非负的硬约束违反向量
+
+$$
+\boldsymbol\delta_t^{\mathrm{hard}}
+\left(
+\mathbf s_t^{PI,\mathrm{exp}},
+\mathbf a_t^{\mathrm{core}}
+\right)
+\in
+\mathbb R_{\ge0}^{J_H},
+$$
+
+其中，$J_H$为硬约束检查项数量；每个分量等于$0$表示对应硬约束得到满足，大于$0$表示发生违反。当前状态下的核心动作可行域严格定义为
+
+$$
+\mathbb A_t^{\mathrm{feas}}
+:=
+\left\{
+\mathbf a_t^{\mathrm{core}}
+\in
+\mathbb A_t^{\mathrm{raw}}
+\ \middle|\ {}
+\boldsymbol\delta_t^{\mathrm{hard}}
+\left(
+\mathbf s_t^{PI,\mathrm{exp}},
+\mathbf a_t^{\mathrm{core}}
+\right)
+=
+\mathbf 0
+\right\}.
+$$
+
+因此，时刻$t$允许被执行的动作必须满足
+
+$$
+\mathbf a_t^{\mathrm{core}}
+\in
+\mathbb A_t^{\mathrm{feas}},
+$$
+
+而不是从$\mathbb A_t^{\mathrm{raw}}$中任意选择动作。$\boldsymbol\delta_t^{\mathrm{hard}}$的各个分量将在本部分第3节逐项展开；软约束不决定动作是否属于可行域，而是在第4节进入代价或风险项。
+
+CPU分配、发射功率、MCS、车辆移动、当前固定的UAV运动、任务到达、返回路由、缓存和mission分配均不是当前决策变量；这些量分别按照第二部分的分类作为固定机制、外生过程或随机过程进入状态转移。CPU虽不是动作，但其确定性工作守恒规则必须在候选卸载与RB通信更新后、计算状态更新前执行，并对不同候选分别产生输出。当前正式决策变量只有卸载与RB分配，后续扩展动作必须重新定义动作空间、可行域和对应实验，不能直接混入$\mathbf a_t^{\mathrm{core}}$。
+
+本节定义的是单个决策时刻真正执行的动作。是否在规划器中同时构造未来$K$步候选动作序列，属于第四部分的规划方法，不在此处把它增加为新的系统决策变量。
+
+### 2. 系统最终优化目标
+
+系统最终要优化的不是链路速率预测误差，而是核心调度动作长期作用后的**任务服务质量与资源效率**。单个时刻执行的决策变量是$\mathbf a_t^{\mathrm{core}}$，但任务完成和端到端时延由多个时刻连续累积形成，因此最终目标以调度策略为优化对象。
+
+定义可行调度策略
+
+$$
+\pi
+:=
+\{\pi_t\}_{t\in\mathcal T},
+\qquad
+\mathbf a_t^{\mathrm{core}}
+=
+\pi_t
+\left(
+\mathbf h_t
+\right)
+\in
+\mathbb A_t^{\mathrm{feas}},
+$$
+
+并令$\Pi^{\mathrm{feas}}$表示所有满足上述因果边界和动作可行域要求的策略集合。这里的$\pi$不是PI-JWM本体，而是使用PI-JWM预测结果进行调度的策略或规划器。
+
+为避免仿真结束造成右删失，只在结果可判定的任务集合$\mathcal M^{\mathrm{eval}}$上计算系统目标。$\mathcal M^{\mathrm{eval}}$只包含已经完成、已经失败，或者其deadline已经落在观测窗口内的任务。每个有效评价轨迹必须满足$|\mathcal M^{\mathrm{eval}}|>0$；若该集合为空，则该轨迹不计算任务级目标，不能把目标值记为$0$。对任意$m\in\mathcal M^{\mathrm{eval}}$，定义
+
+| 符号 | 严格定义 |
+| --- | --- |
+| $\omega_m^{\mathrm{pri}}>0$ | 任务$m$的优先级权重 |
+| $t_m^{\mathrm{term}}$ | 任务成功时取完成时刻，明确失败时取失败判定时刻；若任务在deadline后仍未终止，则取$t_m^{\mathrm{ddl}}$作为评价截断时刻 |
+| $t_m^{\mathrm{ddl}}$ | 任务$m$的绝对deadline时刻 |
+| $T_m^{\mathrm{e2e}}:=t_m^{\mathrm{term}}-t_m^{\mathrm{arr}}$ | 任务端到端时延 |
+| $I_m^{\mathrm{on}}$ | 任务是否在deadline前成功完成的指示量 |
+| $\widetilde T_m\in[0,1]$ | 任务归一化有效时延 |
+
+按时完成指示量定义为
+
+$$
+I_m^{\mathrm{on}}
+:=
+\mathbb I
+\left[
+\ell_{m,t_m^{\mathrm{term}}}=\mathrm{完成}
+\ \land\ {}
+t_m^{\mathrm{term}}\le t_m^{\mathrm{ddl}}
+\right].
+$$
+
+未按时完成的任务不能通过“没有完成时延”逃避时延代价，因此定义
+
+$$
+\widetilde T_m
+:=
+\begin{cases}
+\min\!\left\{
+\dfrac{T_m^{\mathrm{e2e}}}
+{t_m^{\mathrm{ddl}}-t_m^{\mathrm{arr}}},
+1
+\right\},
+& \ell_{m,t_m^{\mathrm{term}}}=\mathrm{完成},\\[8pt]
+1,
+& \text{任务失败或未在deadline前完成}.
+\end{cases}
+$$
+
+系统中的移动、信道、任务到达及其他外生随机过程共同记为$\xi$。以下先定义给定策略$\pi$和一次外生实现$\xi$时的轨迹级代价$\widehat J_q(\pi;\xi)$，再对策略诱导的轨迹分布取期望，得到用于优化的系统代价$J_q(\pi)$。
+
+系统目标由五个分量构成。
+
+**（1）任务服务损失。** 首要目标是提高带优先级的按时任务完成率：
+
+$$
+\widehat J_{\mathrm{cmp}}(\pi;\xi)
+:=
+1-
+\frac{
+\sum_{m\in\mathcal M^{\mathrm{eval}}}
+\omega_m^{\mathrm{pri}}I_m^{\mathrm{on}}
+}{
+\sum_{m\in\mathcal M^{\mathrm{eval}}}
+\omega_m^{\mathrm{pri}}
+}.
+$$
+
+$\widehat J_{\mathrm{cmp}}=0$表示该评价轨迹中的所有被评价任务均按时完成；数值越大表示未按时完成的加权任务比例越高。任务失败和deadline违反将在本部分第7节作为不同评价指标分别报告，但在最终优化目标中统一表现为按时服务损失。
+
+**（2）时延代价。** 在完成能力相近时，进一步降低任务端到端时延：
+
+$$
+\widehat J_{\mathrm{lat}}(\pi;\xi)
+:=
+\frac{
+\sum_{m\in\mathcal M^{\mathrm{eval}}}
+\omega_m^{\mathrm{pri}}\widetilde T_m
+}{
+\sum_{m\in\mathcal M^{\mathrm{eval}}}
+\omega_m^{\mathrm{pri}}
+}.
+$$
+
+**（3）能量代价。** 令$\mathcal N^E\subseteq\mathcal N$为具有可用能量字段的物理节点集合，$E^{\mathrm{ref}}>0$为事先固定的参考能量，则
+
+$$
+\widehat J_{\mathrm{ene}}(\pi;\xi)
+:=
+\frac{
+\sum_{t\in\mathcal T}
+\sum_{i\in\mathcal N^E}
+\Delta E_{i,t}
+}{
+E^{\mathrm{ref}}
+}.
+$$
+
+只有真实存在且可审计的能量字段才能进入该项；不存在的车辆、RSU或任务能耗不能用零值代替。若某组数据无法形成可比较的能量代价，则该组实验只能标记为“部分目标验证”，并从该实验的优化式中删除能量项，而不是填入伪造的零值后声称完成了全目标评价。
+
+**（4）资源消耗代价。** 分别统计RB时隙占用量和CPU占用量：
+
+$$
+C_{\mathrm{RB}}(\pi)
+:=
+\frac{
+\sum_{t\in\mathcal T}
+\sum_{b\in\mathcal B}
+L_{b,t}^{\mathrm{RB}}
+}{
+C_{\mathrm{RB}}^{\mathrm{ref}}
+},
+\qquad
+C_{\mathrm{CPU}}(\pi)
+:=
+\frac{
+\sum_{t\in\mathcal T}
+\sum_{i\in\mathcal N^F}
+F_{i,t}^{\mathrm{use}}\Delta t
+}{
+C_{\mathrm{CPU}}^{\mathrm{ref}}
+},
+$$
+
+其中，$\mathcal N^F\subseteq\mathcal N$为具有计算资源的节点集合，$C_{\mathrm{RB}}^{\mathrm{ref}},C_{\mathrm{CPU}}^{\mathrm{ref}}>0$为固定归一化基准。资源消耗代价为
+
+$$
+\widehat J_{\mathrm{res}}(\pi;\xi)
+:=
+\eta_{\mathrm{RB}}C_{\mathrm{RB}}(\pi)
++
+\eta_{\mathrm{CPU}}C_{\mathrm{CPU}}(\pi),
+\qquad
+\eta_{\mathrm{RB}},\eta_{\mathrm{CPU}}\ge0,
+\quad
+\eta_{\mathrm{RB}}+\eta_{\mathrm{CPU}}=1.
+$$
+
+该项表示在相近任务服务水平下减少不必要的资源占用，不表示单独追求低利用率。
+
+**（5）服务公平性代价。** 对每个物理节点$i$，先定义其在当前评价轨迹中产生的任务集合
+
+$$
+\mathcal M_i^{\mathrm{eval}}
+:=
+\left\{
+m\in\mathcal M^{\mathrm{eval}}
+\ \middle|\ {}
+\sum_{u\in\mathcal V_{t_m^{\mathrm{arr}}}^I}
+\mu_{mu,t_m^{\mathrm{arr}}}^{q^{\mathrm{src}}}
+[\mathbf C_{t_m^{\mathrm{arr}}}^{IP}]_{ui}=1
+\right\},
+$$
+
+并令$\mathcal N^{\mathrm{src}}:=\{i\in\mathcal N\mid |\mathcal M_i^{\mathrm{eval}}|>0\}$。源节点$i$的带权按时完成率严格定义为
+
+$$
+\mathrm{TCR}_i
+:=
+\frac{
+\sum_{m\in\mathcal M_i^{\mathrm{eval}}}
+\omega_m^{\mathrm{pri}}I_m^{\mathrm{on}}
+}{
+\sum_{m\in\mathcal M_i^{\mathrm{eval}}}
+\omega_m^{\mathrm{pri}}
+}.
+$$
+
+采用Jain公平指数的补量定义轨迹级服务公平性代价：
+
+$$
+\widehat J_{\mathrm{fair}}(\pi;\xi)
+:=
+1-
+\frac{
+\left(
+\sum_{i\in\mathcal N^{\mathrm{src}}}
+\mathrm{TCR}_i
+\right)^2
+}{
+|\mathcal N^{\mathrm{src}}|
+\sum_{i\in\mathcal N^{\mathrm{src}}}
+\mathrm{TCR}_i^2
+}.
+$$
+
+$\widehat J_{\mathrm{fair}}=0$表示该评价轨迹中各任务源具有相同的按时完成率；当所有$\mathrm{TCR}_i$均为$0$时，约定$\widehat J_{\mathrm{fair}}=1$，避免Jain指数出现$0/0$且不把“所有源均未完成任务”误判为公平服务。
+
+对每个具有可靠原始字段的$q\in\{\mathrm{cmp},\mathrm{lat},\mathrm{ene},\mathrm{res},\mathrm{fair}\}$，系统优化使用的策略级代价定义为
+
+$$
+J_q(\pi)
+:=
+\mathbb E_{\xi\sim P^{\pi}}
+\left[
+\widehat J_q(\pi;\xi)
+\right],
+$$
+
+其中$P^{\pi}$表示执行策略$\pi$后由系统动力学与外生随机过程共同诱导的轨迹分布。正式实验以多个独立seed或真实轨迹上的样本均值及置信区间估计该期望，不能用单次有利轨迹代替策略表现。
+
+五个目标不能在未归一化时直接相加，也不能让节省能量或资源的收益抵消大量任务失败。因此采用**两层优化**。
+
+第一层先求可行策略能够达到的最小任务服务损失：
+
+$$
+J_{\mathrm{cmp}}^{\star}
+:=
+\min_{\pi\in\Pi^{\mathrm{feas}}}
+J_{\mathrm{cmp}}(\pi).
+$$
+
+给定允许的服务损失容差$\epsilon_{\mathrm{svc}}\ge0$，只保留完成能力接近最优的策略：
+
+$$
+\Pi_{\epsilon}^{\mathrm{svc}}
+:=
+\left\{
+\pi\in\Pi^{\mathrm{feas}}
+\ \middle|\ {}
+J_{\mathrm{cmp}}(\pi)
+\le
+J_{\mathrm{cmp}}^{\star}
++
+\epsilon_{\mathrm{svc}}
+\right\}.
+$$
+
+第二层在该集合内优化归一化时延、能量、资源与公平性：
+
+$$
+J_{\mathrm{sec}}(\pi)
+:=
+\lambda_{\mathrm{lat}}J_{\mathrm{lat}}(\pi)
++
+\lambda_{\mathrm{ene}}J_{\mathrm{ene}}(\pi)
++
+\lambda_{\mathrm{res}}J_{\mathrm{res}}(\pi)
++
+\lambda_{\mathrm{fair}}J_{\mathrm{fair}}(\pi),
+$$
+
+$$
+\lambda_q\ge0,
+\qquad
+\sum_{q\in\{\mathrm{lat},\mathrm{ene},\mathrm{res},\mathrm{fair}\}}
+\lambda_q=1,
+$$
+
+不启用额外SLA时，基础系统优化问题定义为
+
+$$
+\boxed{
+\pi^{\star}
+\in
+\arg\min_{
+\pi\in\Pi_{\epsilon}^{\mathrm{svc}}
+}
+J_{\mathrm{sec}}(\pi)
+}.
+$$
+
+因此，当前课题最终希望达到的效果是：所有动作始终满足硬约束，尽可能多的高优先级任务在deadline前完成；在按时完成能力基本不下降的前提下，进一步降低端到端时延、能量和资源消耗，并减少不同任务源之间的服务差异。
+
+$E^{\mathrm{ref}}$、$C_{\mathrm{RB}}^{\mathrm{ref}}$、$C_{\mathrm{CPU}}^{\mathrm{ref}}$、$\epsilon_{\mathrm{svc}}$和四个$\lambda_q$必须在正式实验前由训练/验证数据或明确的SLA固定，不能根据锁定测试集反复调整。各目标分量必须分别报告，不能只报告最终加权和。
+
+该系统目标用于评价和选择调度策略，不是PI-JWM的训练损失。PI-JWM需要学习的是候选动作作用下的未来状态与结果分布；如何由预测结果近似上述系统目标，放在第5、6节继续定义。
+
+### 3. 硬约束
+
+硬约束表示系统在任何时刻都不允许违反的物理、协议和逻辑规则。硬约束不能依靠增加损失权重来“尽量满足”，而必须由动作掩码、可行域求解器或执行前安全检查严格保证。PI-JWM可以预测候选动作的后果，但不能用预测值覆盖当前可直接验证的硬约束。
+
+**（1）因果性与变量取值。** 动作必须关于决策信息集$\mathcal F_t^{\mathrm{dec}}$可测，即动作只能使用选择动作前合法获得的信息：
+
+$$
+\mathbf a_t^{\mathrm{core}}
+\text{是}
+\mathcal F_t^{\mathrm{dec}}
+\text{-可测的},
+$$
+
+并且所有逐元素卸载与RB动作都必须保持第二部分规定的二元取值。未来真实CSI、未来任务到达、未来状态和动作执行结果不得进入当前动作。
+
+**（2）卸载唯一性与执行节点合法性。** 令$\chi_{mi,t}^{\mathrm{off}}\in\{0,1\}$表示由当前显式状态和固定协议确定的任务—节点兼容性；它检查节点是否存在、是否具有计算能力以及是否支持任务$m$所需的服务类型。合法候选执行节点集合为
+
+$$
+\mathcal N_{m,t}^{\mathrm{off}}
+:=
+\left\{
+i\in\mathcal N
+\ \middle|\ {}
+\zeta_{i,t}^P=1,
+\ \bar F_i>0,
+\ \chi_{mi,t}^{\mathrm{off}}=1
+\right\}.
+$$
+
+每个等待卸载的任务必须且只能选择一个合法执行节点：
+
+$$
+\sum_{i\in\mathcal N}a_{mi,t}^{\mathrm{off}}=1,
+\qquad
+a_{mi,t}^{\mathrm{off}}
+\le
+\mathbb I\!\left[i\in\mathcal N_{m,t}^{\mathrm{off}}\right],
+\qquad
+m\in\mathcal M_t^{\mathrm{off}}.
+$$
+
+该约束只决定执行节点，不把CPU分配变成新的动作；CPU仍由候选通信后执行的固定规则$\mu_{\mathrm{wc}}^{\mathrm{cpu}}$产生。
+
+**（3）流—信息链路一致性与路径连续性。** 对任意获得服务的数据流$f\in\mathcal F_t$，其源、目的代理由业务状态确定。令$\beta_{f,e,t}\in\{0,1\}$表示数据流$f$是否使用信息通信边$e$，则选中链路必须在信息图上构成从$s(f)$到$d(f)$的有向简单路径：
+
+$$
+\Pi_{f,t}^{I}
+:=
+\left\{
+e\in\mathcal E_t^I\mid\beta_{f,e,t}=1
+\right\}
+\in
+\mathcal P_{s(f),d(f),t}^{I}.
+$$
+
+AirFogSim当前首版通常为单跳，此时$\Pi_{f,t}^{I}$只含一条端点一致的通信边。pending数据流允许暂时没有可服务链路，但一旦分配RB并声明获得服务，就必须满足链路端点、方向和路径连续性。$\mathbf C_t^{EP}$只用于把通信边回指到物理端点及空间关系，不承担业务路由。
+
+令无线信息边集合为
+
+$$
+\mathcal E_t^{I,W}
+:=
+\left\{
+e\in\mathcal E_t^I\mid\lambda_e^I=\mathrm{wireless}
+\right\}.
+$$
+
+RB只能分配给无线信息边及其已有数据流：
+
+$$
+a_{f,e,b,t}^{\mathrm{RB}}
+\le
+\mathbb I[e\in\mathcal E_t^{I,W}]
+[\mathbf C_t^{FL}]_{f,e}.
+$$
+
+**（4）RB容量、冲突与链路可解码性。** 同一信息边的同一RB在一个时隙内至多服务一条数据流：
+
+$$
+\sum_{f\in\mathcal F_t}a_{f,e,b,t}^{\mathrm{RB}}\le1,
+\qquad
+e\in\mathcal E_t^{I,W},\ b\in\mathcal B.
+$$
+
+令$\mathcal C_{b,t}^{\mathrm{RB}}\subseteq\mathcal E_t^{I,W}\times\mathcal E_t^{I,W}$为协议给定的冲突信息边对集合，则冲突边不能同时激活：
+
+$$
+y_{e,b,t}^{\mathrm{tx}}+y_{e',b,t}^{\mathrm{tx}}\le1,
+\qquad
+(e,e')\in\mathcal C_{b,t}^{\mathrm{RB}}.
+$$
+
+不属于冲突集合的链路允许空间复用，但同频干扰必须进入信息边SINR。若固定PHY/MCS给出最小解码阈值$\underline\gamma_{e,b}$，则活动传输还必须满足$\gamma_{e,b,t}\ge\underline\gamma_{e,b}$。
+**（5）计算、存储与能量容量。** 当前CPU服务率虽然由固定机制产生，但仍必须满足容量限制；动作作用后的存储和能量状态也不能越界：
+
+$$
+0
+\le
+\sum_{m\in\mathcal M_t}f_{mi,t}^{\mathrm{cpu}}
+\le
+\bar F_i,
+$$
+
+$$
+0
+\le
+S_{i,t}^{\mathrm{use}}
+\le
+\bar S_i,
+\qquad
+0
+\le
+\Delta E_{i,t}
+\le
+E_{i,t}
+\le
+E_i^{\max}.
+$$
+
+这些约束只应用于具有相应有效字段的节点；字段未知必须使用掩码并标记为不可审计，不能把未知容量记为$0$。任何会使确定性下一状态超过容量的动作都不属于$\mathbb A_t^{\mathrm{feas}}$。
+
+**（6）任务阶段、前驱关系与守恒。** 令
+
+$$
+\boldsymbol\nu_{m,t}^{\mathrm{stage}}
+:=
+\left[
+\nu_{m,t}^{\mathrm{in}},
+\nu_{m,t}^{\mathrm{cpu}},
+\nu_{m,t}^{\mathrm{out}}
+\right]
+\in\{0,1\}^3
+$$
+
+表示由$\ell_{m,t}$和固定生命周期规则确定的输入传输、计算与结果回传服务资格，并令$\nu_{mn,t}^{\mathrm{dep}}\in\{0,1\}$表示依赖流$(m,n)$当前是否允许传输。一个时隙内的有效服务增量必须满足
+
+$$
+\mathbf 0
+\le
+\begin{bmatrix}
+\Delta D_{m,t}^{\mathrm{in}}\\
+\Delta W_{m,t}^{\mathrm{cpu}}\\
+\Delta D_{m,t}^{\mathrm{out}}
+\end{bmatrix}
+\le
+\mathbf r_{m,t}^{M,\mathrm{rem}}
+\odot
+\boldsymbol\nu_{m,t}^{\mathrm{stage}},
+$$
+
+$$
+0
+\le
+\Delta D_{mn,t}^{\mathrm{dep}}
+\le
+D_{mn,t}^{\mathrm{dep,rem}}
+\nu_{mn,t}^{\mathrm{dep}}.
+$$
+
+其中$\odot$表示逐元素乘法。任务进入输入或计算阶段前必须满足直接前驱条件：
+
+$$
+\nu_{m,t}^{\mathrm{in}}
+\le
+r_{m,t}^{\mathrm{ready}},
+\qquad
+\nu_{m,t}^{\mathrm{cpu}}
+\le
+r_{m,t}^{\mathrm{ready}}.
+$$
+
+服务增量必须按照第二部分的剩余量等式更新，不能产生负剩余量、跳过生命周期阶段，也不能把多跳路径每一跳的传输量重复计入端到端任务进度。deadline时间戳和完成判定规则是硬逻辑：未真实完成的任务不能标记为完成，deadline之后完成的任务不能回溯记为按时完成；但“任务一定在deadline前完成”本身属于下一节的软服务要求，因为在随机信道和过载条件下它不一定始终可行。
+
+**（7）硬约束违反向量。** 将上述所有不等式统一写为$g_j^H(\mathbf s_t^{PI,\mathrm{exp}},\mathbf a_t^{\mathrm{core}})\le0$，所有等式写为$h_j^H(\mathbf s_t^{PI,\mathrm{exp}},\mathbf a_t^{\mathrm{core}})=0$，则第1节中的违反向量可具体写为
+
+$$
+\boldsymbol\delta_t^{\mathrm{hard}}
+=
+\left(
+\left\{
+\left[g_j^H\right]^+
+\right\}_{j\in\mathcal J_H^{\le}},
+\left\{
+\left|h_j^H\right|
+\right\}_{j\in\mathcal J_H^{=}}
+\right),
+$$
+
+其中$[x]^+:=\max\{x,0\}$。因此
+
+$$
+\mathbf a_t^{\mathrm{core}}
+\in
+\mathbb A_t^{\mathrm{feas}}
+\Longleftrightarrow
+\boldsymbol\delta_t^{\mathrm{hard}}
+=
+\mathbf 0.
+$$
+
+动作进入PI-JWM rollout或真实系统执行之前都应先通过该检查；预测结果只能用于比较多个已经满足当前硬约束的动作。
+
+### 4. 软约束与风险
+
+软约束表示希望满足、但在高负载、突发任务、信道衰落或分布外场景中可能暂时无法满足的服务要求。软约束被违反时，动作不一定物理不可执行，但必须记录违反量并付出代价；不能把软约束偷偷改成没有后果的描述性指标。
+
+令$\mathcal J_S$为启用的软约束索引集合，$G_\jmath(\pi)$为已经归一化的策略级服务或风险量，$\overline G_\jmath$为实验前固定的允许上限。每个软约束统一写为
+
+$$
+G_\jmath(\pi)
+\le
+\overline G_\jmath
++
+\epsilon_\jmath^{\mathrm{soft}},
+\qquad
+\epsilon_\jmath^{\mathrm{soft}}
+:=
+\left[
+G_\jmath(\pi)-\overline G_\jmath
+\right]^+
+\ge0,
+\qquad
+\jmath\in\mathcal J_S.
+$$
+
+$\epsilon_\jmath^{\mathrm{soft}}=0$表示对应SLA得到满足，大于$0$表示允许但必须量化的违反。$\overline G_\jmath$不能根据锁定测试集或某次实验结果事后调整。
+
+**（1）服务可靠性与尾时延。** 按时任务服务损失可以设置为SLA：
+
+$$
+J_{\mathrm{cmp}}(\pi)
+\le
+\overline J_{\mathrm{cmp}}
++
+\epsilon_{\mathrm{cmp}}^{\mathrm{soft}}.
+$$
+
+为了避免平均时延掩盖少量严重超时，令$\widetilde T$表示从评价任务和轨迹中抽取的归一化有效时延，$\varrho_{\mathrm{tail}}\in(0,1)$为尾部置信水平，则
+
+$$
+\operatorname{CVaR}_{\varrho_{\mathrm{tail}}}
+(\widetilde T)
+:=
+\min_{\upsilon_{\mathrm{tail}}\in\mathbb R}
+\left\{
+\upsilon_{\mathrm{tail}}
++
+\frac{1}{1-\varrho_{\mathrm{tail}}}
+\mathbb E
+\left[
+(\widetilde T-\upsilon_{\mathrm{tail}})^+
+\right]
+\right\},
+$$
+
+并要求
+
+$$
+\operatorname{CVaR}_{\varrho_{\mathrm{tail}}}
+(\widetilde T)
+\le
+\overline T_{\mathrm{tail}}
++
+\epsilon_{\mathrm{tail}}^{\mathrm{soft}}.
+$$
+
+这里$\upsilon_{\mathrm{tail}}$只是CVaR公式中的辅助变量，不是系统调度动作。正式实验仍需同时报告平均、P95和P99时延，不能只保留一个尾风险数值。
+
+**（2）平均资源、能耗与公平性要求。** 物理容量不能违反，但长期资源消耗、平均能量和服务公平性可以设置为带松弛的运行目标：
+
+$$
+J_{\mathrm{ene}}(\pi)
+\le
+\overline J_{\mathrm{ene}}
++
+\epsilon_{\mathrm{ene}}^{\mathrm{soft}},
+\qquad
+J_{\mathrm{res}}(\pi)
+\le
+\overline J_{\mathrm{res}}
++
+\epsilon_{\mathrm{res}}^{\mathrm{soft}},
+$$
+
+$$
+J_{\mathrm{fair}}(\pi)
+\le
+\overline J_{\mathrm{fair}}
++
+\epsilon_{\mathrm{fair}}^{\mathrm{soft}}.
+$$
+
+能量字段不可审计时不能启用能量软约束；缺失量不能用零值满足预算。公平约束使用第2节已经定义的完成率公平性，不用任务数量相同替代服务结果公平。
+
+**（3）未来约束风险与不确定性。** 当前时刻的硬约束必须由显式状态直接检查；对于PI-JWM预测的未来第$k$步状态，只能形成概率意义上的风险判断。定义
+
+$$
+G_{\mathrm{safe},k}^{\mathrm{pred}}
+:=
+\Pr_{p_\theta}
+\left(
+\left\|
+\boldsymbol\delta_{t+k}^{\mathrm{hard}}
+\right\|_1>0
+\ \middle|\ {}
+\mathcal F_t^{\mathrm{dec}},
+\mathbf a_{t:t+k-1}^{\mathrm{core}}
+\right),
+$$
+
+并设置机会约束
+
+$$
+G_{\mathrm{safe},k}^{\mathrm{pred}}
+\le
+\overline p_k^{\mathrm{viol}}
++
+\epsilon_{\mathrm{safe},k}^{\mathrm{soft}},
+\qquad
+k=1,\ldots,K,
+$$
+
+其中$\overline p_k^{\mathrm{viol}}\in[0,1]$是在实验前固定的最大可接受预测违反概率。若PI-JWM输出协方差、ensemble分歧、分位数或共形区间，则规划器应使用相应风险量的校准上界$U_{\jmath,t}^{\mathrm{cal}}$而不是只使用点预测：
+
+$$
+U_{\jmath,t}^{\mathrm{cal}}
+\le
+\overline G_\jmath
++
+\epsilon_{\jmath,t}^{\mathrm{soft}}.
+$$
+
+协方差描述模型给出的联合波动；共形区间只有在校准样本与部署样本满足相应可交换性条件时，才提供有限样本的边际覆盖控制。二者都不能把未来预测变成确定性的物理保证。若动作超出训练数据支持、OOD分数过高或校准覆盖失效，安全壳必须缩短rollout、回退到保守动作或拒绝该候选。具体不确定性构造方法和校准实验放在第四、六部分。
+
+**（4）软约束总代价及其与最终目标的关系。** 用非负权重$\rho_r$汇总所有无量纲松弛量：
+
+$$
+J_{\mathrm{soft}}(\pi)
+:=
+\sum_{\jmath\in\mathcal J_S}
+\rho_\jmath
+\epsilon_\jmath^{\mathrm{soft}},
+\qquad
+\rho_\jmath\ge0,
+\qquad
+\sum_{\jmath\in\mathcal J_S}\rho_\jmath=1.
+$$
+
+启用SLA时，第2节的第二层代价扩展为
+
+$$
+\widetilde J_{\mathrm{sec}}(\pi)
+:=
+J_{\mathrm{sec}}(\pi)
++
+\lambda_{\mathrm{soft}}
+J_{\mathrm{soft}}(\pi),
+\qquad
+\lambda_{\mathrm{soft}}\ge0,
+$$
+
+完整选择问题为
+
+$$
+\boxed{
+\pi^\star
+\in
+\arg\min_{\pi\in\Pi_\epsilon^{\mathrm{svc}}}
+\widetilde J_{\mathrm{sec}}(\pi)
+}.
+$$
+
+没有启用额外SLA时取$\lambda_{\mathrm{soft}}=0$，该式退化为第2节的基础目标。无论$\lambda_{\mathrm{soft}}$多大，软约束罚项都不能补偿硬约束违反；硬约束不满足的动作必须先从候选集合中删除。
+
+| 边界问题 | 硬约束 | 软约束或风险目标 |
+| --- | --- | --- |
+| deadline | 完成和超时判定不能造假 | 按时完成率、超时概率和尾时延 |
+| 资源 | CPU、存储、能量和RB不能超过物理容量 | 平均资源消耗、利用率和能效目标 |
+| 链路 | 物理边、跨图路径、冲突关系和固定MCS解码条件必须合法 | 未来链路失效概率和服务可靠性 |
+| 任务 | 阶段顺序、DAG前驱和剩余量守恒必须满足 | 不同优先级任务的完成率和公平性 |
+| 不确定性 | 当前动作仍须通过确定性安全检查 | rollout机会约束、校准上界和OOD回退 |
+
+文献角色边界：DAG卸载文献支撑任务前驱、卸载和资源容量约束的标准形式；无线RRM文献支撑链路冲突、资源可行域及服务目标分离；Angelopoulos和Bates（2023）的共形预测用于校准区间解释。各条约束的正式原始文献、本文改造点和证据状态统一放在第五部分，不在本节提前宣称创新。
+
+### 5. PI-JWM预测目标
+
+PI-JWM的核心任务是学习：在给定当前观测—动作历史和未来候选核心动作后，物理—信息联合系统在未来$K$步将如何演化。它不是只预测链路速率，也不直接输出一个未经解释的“最优动作”。
+
+给定历史$\mathbf h_t$，先由推断模型获得当前latent belief：
+
+$$
+\mathbf b_t
+\sim
+q_\phi
+\left(
+\mathbf b_t
+\mid
+\mathbf h_t
+\right).
+$$
+
+对于候选动作序列$\mathbf a_{t:t+K-1}^{\mathrm{core}}$及决策时可获得的未来上下文$\mathbf c_{t:t+K-1}^{\mathrm{avail}}$，PI-JWM学习条件预测分布
+
+$$
+p_\theta
+\left(
+\mathbf s_{t+1:t+K}^{PI,\mathrm{tar}}
+\ \middle|\ {}
+\mathbf b_t,
+\mathbf a_{t:t+K-1}^{\mathrm{core}},
+\mathbf c_{t:t+K-1}^{\mathrm{avail}}
+\right).
+$$
+
+其中$\mathbf s_{t+k}^{PI,\mathrm{tar}}$不是默认等于不可完全观测的真实完整状态$\mathbf s_{t+k}^{PI}$，而是当前数据源能够提供可靠标签、且规划器确实需要的目标状态子集。令$\mathfrak T_{\mathcal D}$表示由数据契约确定的目标抽取过程，则
+
+$$
+\mathbf s_{t+k}^{PI,\mathrm{tar}}
+:=
+\mathfrak T_{\mathcal D}
+\left(
+\mathbf s_{t+k}^{PI}
+\right),
+\qquad
+\mathbf M_{t+k}^{\mathrm{tar}}
+\in
+\{0,1\}^{dim(\mathbf s_{t+k}^{PI,\mathrm{tar}})\times
+\dim(\mathbf s_{t+k}^{PI,\mathrm{tar}})},
+$$
+
+$\mathbf M_{t+k}^{\mathrm{tar}}$是标签可用性对角掩码。掩码为$0$表示字段缺失、不适用或不可审计；相应字段不进入损失，不能用补零后的数值冒充真实标签。
+
+**（1）预测量分为三层。**
+
+| 层次 | 内容 | PI-JWM中的处理 |
+| --- | --- | --- |
+| 确定性状态 | 动作写入、阶段合法转换、RB计数、已知路径、容量和剩余量守恒 | 由$\mathcal U^{\mathrm{det}}$严格更新，不要求神经网络重新猜测 |
+| 随机或未观测状态 | 信道变化、有效服务量、随机任务演化、未观测队列和执行扰动 | 由动作条件latent动力学预测其条件分布 |
+| 派生服务结果 | 完成、超时、端到端时延、能耗、资源代价和未来约束风险 | 从预测状态轨迹计算；可增加辅助预测头，但必须与状态轨迹一致 |
+
+这种分层避免两种错误：一是让神经网络学习本来可以由规则精确计算的量，二是同时独立预测状态和结果，却允许二者互相矛盾。
+
+**（2）物理侧预测目标。** 物理侧只预测或接收真实实体及空间环境状态：
+
+- 物理节点存在状态$\zeta_{i,t+k}^P$；
+- 当未来移动上下文不可直接获得时的位置、速度、加速度和航向；
+- 物理邻接关系及相对位置、距离、相对速度、LoS/遮挡状态；
+- 设备剩余能量及可观测硬件状态。
+
+如果位置和轨迹已经作为$\mathbf c_{t:t+K-1}^{\mathrm{avail}}$给定，则PI-JWM将其作为条件，不再把同一字段同时当作未知预测目标。
+
+**（3）信息侧与辅助任务状态预测目标。** 信息侧预测或确定性更新：
+
+- 信息代理的待分配队列、发送队列、计算积压、执行中任务和结果队列摘要；
+- 信息通信边集合$\mathcal E_{t+k}^I$及其可用性、CSI/信道增益、链路活动、干扰、SINR、速率和吞吐量；
+- 数据流集合$\mathcal F_{t+k}$、端点、类型、pending/active/completed阶段、剩余数据量和服务增量；
+- 活动任务集合$\mathcal M_{t+k}$、生命周期$\ell_{m,t+k}$以及输入、计算与输出剩余量；
+- 若数据真实提供任务DAG，则预测或规则更新依赖满足状态，并在前驱完成且跨代理时释放新的依赖数据流。
+
+尚未到达的随机任务不能提前写入图中。链路活动与条件活跃速率采用hurdle结构分别建模；真实数据只提供RSRP、RSRQ、SINR或吞吐量子集时，只训练相应可观测头，不声称恢复完整CSI。
+
+**（4）跨图关系与资源预测目标。** 未来状态必须保持：
+
+- 信息代理—物理节点附着关系$\mathbf C_{t+k}^{IP}$；
+- 信息通信边—物理端点关系$\mathbf C_{t+k}^{EP}$；
+- 数据流—信息通信边关系$\mathbf C_{t+k}^{FL}$；
+- 任务源、当前持有、执行和结果接收代理关系$\mathbf C_{t+k}^{TI,q}$；
+- CPU、存储和能量资源状态$\mathbf S_{t+k}^{R}$；
+- RB活动传输数$L_{b,t+k}^{\mathrm{RB}}$。
+
+代理附着、端点对应、卸载动作写入和RB计数由规则层产生；信道演化、服务完成量、任务阶段与随机能耗由世界模型预测。所有预测关系必须通过附着唯一性、通信边端点一致性、流—链路一致性和资源硬约束检查。
+**（5）任务结果与系统代价预测。** 规划器最终需要比较候选动作对任务服务的影响，因此从预测轨迹中计算
+
+$$
+\left(
+\widehat I_m^{\mathrm{on}},
+\widehat T_m^{\mathrm{e2e}},
+\widehat J_{\mathrm{cmp}},
+\widehat J_{\mathrm{lat}},
+\widehat J_{\mathrm{ene}},
+\widehat J_{\mathrm{res}},
+\widehat J_{\mathrm{fair}}
+\right)
+=
+\operatorname{Svc}
+\left(
+\widehat{\mathbf s}_{t+1:t+K}^{PI,\mathrm{tar}}
+\right),
+$$
+
+其中$\operatorname{Svc}$严格复用第2节已经固定的任务判定和代价公式。若预测窗口在任务deadline之前结束，则不能把该任务直接判为成功或失败，而应输出“窗口内尚未终止”的概率并在更长rollout或终端结果头中处理。仿真器自带reward只有在与上述系统代价定义严格一致时才能作为辅助标签，不能代替五个正式目标。
+
+**（6）不确定性输出。** PI-JWM对每类目标都不能只给一个点预测。统一的不确定性输出$\widehat{\mathbf u}_{t+1:t+K}$至少应包括：
+
+- 连续字段的均值、方差或结构化协方差；
+- 链路活动、任务阶段、完成和超时等离散事件概率；
+- 需要尾风险分析时的条件分位数；
+- ensemble分歧或其他认知不确定性估计；
+- 在独立校准集上构造的共形区间及其覆盖水平；
+- 动作—状态对的数据支持度和OOD风险。
+
+协方差与事件概率由模型训练获得；共形区间是在模型冻结后使用校准残差构造的后处理结果，不是一个可以直接反向传播的“共形训练标签”。不确定性随$k$增大通常会累积，因此必须按预测步长分别输出和评价，不能用一步方差替代整个$K$步rollout风险。
+
+综上，PI-JWM的正式输出是“候选动作条件下未来严格双图状态、任务和资源结果的联合预测分布”，而不是单一链路速率、单一RMSE、单一reward或直接动作分类。不同数据源允许监督的目标子集可以不同，但每个实验必须通过$\mathbf M_{t+k}^{\mathrm{tar}}$明确其证据边界。
+
+### 6. 世界模型训练目标及其与系统目标的关系
+
+世界模型训练的直接目标是使预测分布接近真实动作条件转移分布，而不是直接最小化第2节的系统代价。令$\mathcal D_{\mathrm{tr}}$为由历史、已执行动作、上下文和未来监督标签组成的训练轨迹集合，模型参数通过
+
+$$
+(\theta^\star,\phi^\star)
+\in
+\arg\min_{\theta,\phi}
+\mathbb E_{\mathcal D_{\mathrm{tr}}}
+\left[
+\mathcal L_{\mathrm{WM}}(\theta,\phi)
+\right]
+$$
+
+进行学习。$\theta$包括latent转移和各预测头参数，$\phi$为历史到belief的推断模型参数。
+
+**（1）动作条件latent动力学损失。** 训练时可以使用未来真实观测形成后验belief作为监督，但开放环rollout的prior不能读取这些未来观测。为统一第一步和后续递归，定义
+
+$$
+\mathbf b_t^{\mathrm{roll}}
+:=
+\mathbf b_t,
+\qquad
+\mathbf b_{t+k}^{\mathrm{roll}}
+:=
+\widehat{\mathbf b}_{t+k}^-,
+\quad
+k\ge1.
+$$
+
+第$k$步动力学一致性损失定义为
+
+$$
+\mathcal L_{\mathrm{dyn},k}
+:=
+D_{\mathrm{KL}}
+\left(
+q_\phi
+\left(
+\mathbf b_{t+k}
+\mid
+\mathbf h_{t+k}
+\right)
+\,\middle\|\,
+p_\theta
+\left(
+\mathbf b_{t+k}^{\mathrm{roll}}
+\mid
+\mathbf b_{t+k-1}^{\mathrm{roll}},
+\mathbf a_{t+k-1}^{\mathrm{core}},
+\mathbf c_{t+k-1}
+\right)
+\right).
+$$
+
+$k=1$时$\mathbf b_t^{\mathrm{roll}}$就是当前后验$\mathbf b_t$；$k>1$时递归使用模型自己的prior。若后续选用确定性JEPA式latent预测器，可以用归一化latent距离替代KL散度，但不能在文档中同时把同一个latent头既写成确定性点预测又写成完整概率后验。
+
+**（2）连续状态概率损失。** 将可监督的连续目标组成$\mathbf s_{t+k}^{\mathrm{cont}}$，模型输出条件均值$\widehat{\boldsymbol\mu}_{t+k}^{\mathrm{cont}}$和正定协方差$\widehat{\boldsymbol\Sigma}_{t+k}^{\mathrm{cont}}$。令$\Omega_{t+k}^{\mathrm{cont}}$为$\mathbf M_{t+k}^{\mathrm{tar}}$确定的有效连续字段索引，定义残差
+
+$$
+\mathbf e_{t+k}^{\mathrm{cont}}
+:=
+\left(
+\mathbf s_{t+k}^{\mathrm{cont}}
+-
+\widehat{\boldsymbol\mu}_{t+k}^{\mathrm{cont}}
+\right)_{\Omega_{t+k}^{\mathrm{cont}}}.
+$$
+
+高斯概率头对应的负对数似然为
+
+$$
+\mathcal L_{\mathrm{cont},k}
+=
+\frac12
+\left[
+(\mathbf e_{t+k}^{\mathrm{cont}})^\top
+(\widehat{\boldsymbol\Sigma}_{t+k,\Omega}^{\mathrm{cont}})^{-1}
+\mathbf e_{t+k}^{\mathrm{cont}}
++
+\log\det
+\widehat{\boldsymbol\Sigma}_{t+k,\Omega}^{\mathrm{cont}}
++
+|\Omega_{t+k}^{\mathrm{cont}}|\log(2\pi)
+\right].
+$$
+
+该损失同时约束预测均值和方差，适用于信道、服务量、剩余量和资源状态等连续字段。协方差必须通过Cholesky参数化、对角下界或其他方式保证正定。若高斯假设明显不成立，应改用混合分布、分位数损失或其他适当概率模型，不能只为了得到“协方差”而强行假设高斯。
+
+**（3）离散事件和图结构损失。** 物理边、信息边、跨图关系、任务完成、超时和链路活动等二元目标使用Bernoulli负对数似然。令$\Omega_{t+k}^{\mathrm{bin}}$为有效二元字段索引，则
+
+$$
+\mathcal L_{\mathrm{bin},k}
+:=
+-
+\sum_{\varsigma\in\Omega_{t+k}^{\mathrm{bin}}}
+\left[
+s_{\varsigma,t+k}^{\mathrm{bin}}
+\log\widehat p_{\varsigma,t+k}
++
+(1-s_{\varsigma,t+k}^{\mathrm{bin}})
+\log(1-\widehat p_{\varsigma,t+k})
+\right].
+$$
+
+生命周期状态等互斥类别使用分类交叉熵：
+
+$$
+\mathcal L_{\mathrm{cat},k}
+:=
+-
+\sum_{\varsigma\in\Omega_{t+k}^{\mathrm{cat}}}
+\sum_{c'=1}^{C_\varsigma}
+s_{\varsigma,c',t+k}^{\mathrm{cat}}
+\log
+\widehat p_{\varsigma,c',t+k}^{\mathrm{cat}}.
+$$
+
+这里$C_\varsigma$是字段$\varsigma$的类别数。动态图节点和边的出现、消失必须使用存在掩码；不存在的补齐节点不能作为大量负样本主导损失。类别极度不平衡时可以在训练集内固定类别权重或采用适当重采样，但最终仍需分别报告precision、recall、F1和概率校准，而不能只报告accuracy。
+
+**（4）确定性规则与守恒一致性损失。** 令$\operatorname{Res}^{\mathrm{rule}}_{t+k}$表示预测轨迹相对于确定性规则的残差向量，包含：
+
+- $\mathcal U^{\mathrm{det}}$规定的动作写入和阶段更新残差；
+- 输入、计算、输出和依赖剩余量守恒残差；
+- 物理边、DAG、跨图节点唯一性、路径连续性和流守恒残差；
+- CPU、存储、能量和RB容量残差；
+- 直接速率头与信道—SINR—速率公式之间的残差。
+
+一致性损失为
+
+$$
+\mathcal L_{\mathrm{rule},k}
+:=
+\left\|
+\operatorname{Res}^{\mathrm{rule}}_{t+k}
+\left(
+\widehat{\mathbf s}_{t+k}^{PI,\mathrm{tar}},
+\widehat{\mathbf s}_{t+k-1}^{PI,\mathrm{tar}},
+\mathbf a_{t+k-1}^{\mathrm{core}}
+\right)
+\right\|_1.
+$$
+
+该项用于减少预测之间的自相矛盾，但不能代替硬约束。进入规划器前，预测图和候选动作仍必须通过第3节的确定性检查或可行投影；不能因为训练时加入了$\mathcal L_{\mathrm{rule}}$就宣称神经网络永远满足物理约束。
+
+**（5）任务结果辅助损失。** 为使latent rollout保留与最终任务服务有关的信息，令$\mathcal M_{t+k}^{\mathrm{eval}}\subseteq\mathcal M^{\mathrm{eval}}$表示截至$t+k$结果已经可以判定的任务集合，并增加
+
+$$
+\mathcal L_{\mathrm{svc},k}
+:=
+\sum_{m\in\mathcal M_{t+k}^{\mathrm{eval}}}
+\omega_m^{\mathrm{pri}}
+\left[
+\operatorname{BCE}
+\left(
+I_m^{\mathrm{on}},
+\widehat p_{m,t+k}^{\mathrm{on}}
+\right)
++
+\lambda_{\mathrm{time}}^{\mathrm{WM}}
+\operatorname{Huber}
+\left(
+\widetilde T_m,
+\widehat{\widetilde T}_{m,t+k}
+\right)
+\right].
+$$
+
+该辅助头不能绕过状态预测：其完成概率和时延必须与预测生命周期、剩余量和deadline一致。窗口内尚不能判定结果的任务使用终止掩码，不作为失败样本加入该损失。
+
+**（6）动作效果识别损失。** 普通观测轨迹只能监督实际执行动作的后果，不能自动提供所有反事实动作的真实标签。当同一起始状态下存在由仿真器、测试床或严格配对实验产生的两个可比较动作序列$\mathbf a$与$\mathbf a'$时，用方括号表示对应动作条件，可以增加
+
+$$
+\mathcal L_{\mathrm{act}}
+:=
+\left\|
+\left(
+\widehat{\mathbf s}_{t+1:t+K}^{PI,\mathrm{tar}}[\mathbf a]
+-
+\widehat{\mathbf s}_{t+1:t+K}^{PI,\mathrm{tar}}[\mathbf a']
+\right)
+-
+\left(
+\mathbf s_{t+1:t+K}^{PI,\mathrm{tar}}[\mathbf a]
+-
+\mathbf s_{t+1:t+K}^{PI,\mathrm{tar}}[\mathbf a']
+\right)
+\right\|_1.
+$$
+
+该损失用于防止模型忽略动作并只做时间序列外推。只有起始状态、外生随机数和评价窗口得到严格控制的配对样本才能使用；不能把两个不同seed或不同任务负载的轨迹差异冒充动作因果效应。没有可靠反事实数据时，PI-JWM只能在观测动作支持范围内声称动作条件预测能力。
+
+**（7）多步总训练目标。** 令$\omega_k^{\mathrm{hor}}\ge0$为第$k$步预测权重，且$\sum_{k=1}^K\omega_k^{\mathrm{hor}}=1$。世界模型总损失定义为
+
+$$
+\mathcal L_{\mathrm{WM}}
+:=
+\sum_{k=1}^K
+\omega_k^{\mathrm{hor}}
+\Big(
+\lambda_{\mathrm{dyn}}^{\mathrm{WM}}\mathcal L_{\mathrm{dyn},k}
++
+\lambda_{\mathrm{cont}}^{\mathrm{WM}}\mathcal L_{\mathrm{cont},k}
++
+\lambda_{\mathrm{bin}}^{\mathrm{WM}}\mathcal L_{\mathrm{bin},k}
++
+\lambda_{\mathrm{cat}}^{\mathrm{WM}}\mathcal L_{\mathrm{cat},k}
++
+\lambda_{\mathrm{rule}}^{\mathrm{WM}}\mathcal L_{\mathrm{rule},k}
++
+\lambda_{\mathrm{svc}}^{\mathrm{WM}}\mathcal L_{\mathrm{svc},k}
+\Big)
++
+\lambda_{\mathrm{act}}^{\mathrm{WM}}\mathcal L_{\mathrm{act}},
+$$
+
+其中所有$\lambda_{\bullet}^{\mathrm{WM}}\ge0$。不存在相应标签或配对样本时，必须通过掩码删除该项，而不是用伪标签训练。各损失量纲不同，权重只能依据训练集和验证集的稳定性、梯度尺度及预先规定的优先级确定，不能在锁定测试集上调节。
+
+$k>1$的状态损失必须基于开放环rollout，即模型递归使用自己的预测状态；如果每一步都重新输入真实未来观测，得到的只是teacher-forcing条件下的一步误差，不能作为多步世界模型能力的证据。正式实验至少分别报告$k=1,5,20$或数据时间尺度允许的对应预测步长。
+
+**（8）概率校准不等于追加训练损失。** 连续概率头使用NLL等proper scoring rule，二元事件使用Bernoulli NLL或Brier score评价概率质量；认知不确定性可以由多个独立初始化或数据重采样的模型形成ensemble。模型和所有超参数冻结后，才在独立校准集上计算共形nonconformity score及分位数，构造$U_{\jmath,t}^{\mathrm{cal}}$或预测区间。校准数据不能继续反向传播更新模型，否则覆盖率评估不再独立。
+
+数据应至少分为训练集、验证集、校准集和锁定测试集：训练集拟合$(\theta,\phi)$，验证集选择结构和损失权重，校准集只确定概率阈值与共形分位数，锁定测试集只做一次最终评价。不同集合应按seed、轨迹、场景或时间段分组隔离，不能把相邻窗口随机拆分后造成同一轨迹泄漏。
+
+**（9）训练目标与系统最终目标的关系。** 两者不相等：
+
+$$
+\mathcal L_{\mathrm{WM}}
+\ne
+J_{\mathrm{cmp}},
+\quad
+\mathcal L_{\mathrm{WM}}
+\ne
+J_{\mathrm{sec}},
+\quad
+\mathcal L_{\mathrm{WM}}
+\ne
+\widetilde J_{\mathrm{sec}}.
+$$
+
+$\mathcal L_{\mathrm{WM}}$要求模型准确、可滚动且概率校准；系统目标要求规划器利用冻结PI-JWM，在硬约束可行域内选择能够改善真实任务服务的动作。对于候选动作序列，规划器根据预测分布估计
+
+$$
+\widehat J_q
+\left(
+\mathbf a_{t:t+K-1}^{\mathrm{core}}
+\mid
+\mathbf h_t,
+\mathbf c_{t:t+K-1}^{\mathrm{avail}}
+\right)
+:=
+\mathbb E_{p_\theta}
+\left[
+\operatorname{Cost}_q
+\left(
+\widehat{\mathbf s}_{t+1:t+K}^{PI,\mathrm{tar}}
+\right)
+\right],
+$$
+
+再按照第2—4节的两层目标、硬约束和风险规则比较候选动作。较低的状态RMSE并不自动保证更好的任务完成率或更低的决策regret；反过来，也不能为了某个策略在少量seed上的高回报而接受失真、未校准或违反守恒的世界模型。
+
+因此验证顺序固定为：先验证单步和多步状态预测、结构合法性、守恒和不确定性校准；这些基础门通过后，再进行动作敏感性和候选排序诊断；最后才进行闭环调度实验。World Models、Dreamer和TD-MPC2支撑动作条件latent rollout这一基本方法链，MBPO、MOPO和COMBO提示模型偏差与支持外动作风险，共形预测文献支撑校准区间；PI-JWM将这些思想组合到严格物理—信息双图、任务生命周期和资源约束中，具体文献改造与创新边界放在第五部分说明。
+
+本节规定目标版训练问题。任一损失项只有在所需字段可用、代码路径存在、测试通过且机器可读产物满足验收标准后，才能被描述为已实现；具体状态统一记录在《8.12之后推进》。
+
+### 7. 评价指标与统计规范
+
+评价指标用于回答三个彼此不同的问题：PI-JWM是否准确地预测了未来联合状态，预测轨迹是否可信且满足严格双图规则，以及使用这些预测后系统任务服务是否真正改善。评价体系不能只保留链路速率RMSE，也不能把所有指标事后压缩成一个掩盖局部失败的总分。
+
+**（1）评价原则与统一口径。**
+
+对目标字段$\varsigma$、预测步长$k$，令$\mathcal I_{k,\varsigma}^{\mathrm{eval}}$表示同时具有真实标签、有效存在掩码且满足该指标适用条件的评价实例集合，$\imath$为其中一个实例。连续字段的预测误差统一定义为
+
+$$
+e_{\imath,k}^{\varsigma}
+:=
+\widehat s_{\imath,k}^{\varsigma}
+-
+s_{\imath,k}^{\varsigma},
+\qquad
+\imath\in\mathcal I_{k,\varsigma}^{\mathrm{eval}}.
+$$
+
+若$|\mathcal I_{k,\varsigma}^{\mathrm{eval}}|=0$，该指标必须记为N/A并解释缺失原因，不能记为$0$。所有指标至少按字段、节点或边类型、预测步长和数据场景分别计算；只有定义、单位和有效样本口径完全一致时才允许汇总。正式实验在运行前为每项实验冻结主指标、次指标和审计指标：主指标回答该实验的核心假设，次指标解释性能来源，审计指标检查合法性、校准和安全边界。
+
+**（2）状态、事件与图结构预测指标。**
+
+对于连续字段，点预测质量至少报告MAE和RMSE：
+
+$$
+\operatorname{MAE}_{k}^{\varsigma}
+:=
+\frac{1}{|\mathcal I_{k,\varsigma}^{\mathrm{eval}}|}
+\sum_{\imath\in\mathcal I_{k,\varsigma}^{\mathrm{eval}}}
+\left|e_{\imath,k}^{\varsigma}\right|,
+$$
+
+$$
+\operatorname{RMSE}_{k}^{\varsigma}
+:=
+\sqrt{
+\frac{1}{|\mathcal I_{k,\varsigma}^{\mathrm{eval}}|}
+\sum_{\imath\in\mathcal I_{k,\varsigma}^{\mathrm{eval}}}
+\left(e_{\imath,k}^{\varsigma}\right)^2
+}.
+$$
+
+概率预测头还必须报告NLL和CRPS，防止只评价均值而忽略预测分布。信息链路活动$y_{e,b,t+k}^{\mathrm{tx}}$和活跃链路速率$R_{e,b,t+k}$必须分开评价：前者作为离散事件评价，后者只在真实链路活动且速率标签有效的实例集合上计算active-only MAE和RMSE。全体不存在或未活动链路上的补零值不得主导速率误差。
+
+任务完成、超时、链路活动、节点或边存在等二元事件至少报告precision、recall、F1、AUPRC、Brier score和ECE。类别严重不平衡时，accuracy只能作为补充指标，不能作为唯一结论。生命周期等多类别状态应报告macro-F1、各类别precision与recall，并给出混淆矩阵。
+
+严格双图结构必须分对象审计：物理空间关系边、信息通信边、代理附着关系、信息边—物理端点对应和流—链路关系分别报告edge F1/AUPRC或确定性准确率，不能混成一个edge score；同时报告信息代理附着唯一性违反率、通信边端点一致率、流—链路一致率、信息通信路径连续率、辅助任务DAG合法率、状态守恒残差和硬约束违反率。结构合法性指标使用确定性判定，不以连续预测误差代替。
+
+**（3）多步rollout与不确定性指标。**
+
+开放环rollout至少逐步报告$k=1,5,20$或与数据时间尺度对应的三个预测范围，并绘制或列表给出每个$k$的状态误差、事件指标、图结构合法率和守恒残差。对任一误差型指标$M_k$，可用
+
+$$
+\Delta M_k:=M_k-M_1
+$$
+
+描述相对一步预测的误差增长，但$\Delta M_k$不能取代各步原始指标。不得只报告对$K$步求平均后的单一数值，因为它会掩盖rollout从哪一步开始失稳。
+
+连续概率输出使用NLL与CRPS评价整体分布；若模型给出置信水平$1-\alpha$的预测区间$[L_{\imath,k}^{\varsigma},U_{\imath,k}^{\varsigma}]$，则分别计算经验覆盖率、覆盖率误差和平均区间宽度：
+
+$$
+\operatorname{Cov}_{k,\varsigma}^{1-\alpha}
+:=
+\frac{1}{|\mathcal I_{k,\varsigma}^{\mathrm{eval}}|}
+\sum_{\imath\in\mathcal I_{k,\varsigma}^{\mathrm{eval}}}
+\mathbb I
+\left[
+s_{\imath,k}^{\varsigma}
+\in
+[L_{\imath,k}^{\varsigma},U_{\imath,k}^{\varsigma}]
+\right],
+$$
+
+$$
+\operatorname{CE}_{k,\varsigma}^{1-\alpha}
+:=
+\left|
+\operatorname{Cov}_{k,\varsigma}^{1-\alpha}
+-(1-\alpha)
+\right|,
+\qquad
+\operatorname{Width}_{k,\varsigma}^{1-\alpha}
+:=
+\frac{1}{|\mathcal I_{k,\varsigma}^{\mathrm{eval}}|}
+\sum_{\imath\in\mathcal I_{k,\varsigma}^{\mathrm{eval}}}
+\left(U_{\imath,k}^{\varsigma}-L_{\imath,k}^{\varsigma}\right).
+$$
+
+覆盖率和区间宽度必须同时报告，并补充interval score或Winkler score，避免用无限宽区间虚假获得高覆盖率。二元概率继续使用Brier score和ECE。认知不确定性还应报告ensemble分歧与真实误差的相关性、高风险样本识别能力，以及OOD检测的AUROC和AUPRC；上述结果均按预测步长、负载和场景分组，不能只在总体样本上给一个平均校准结果。
+
+**（4）任务、资源、安全与闭环决策指标。**
+
+系统效果严格复用第2节的任务集合$\mathcal M^{\mathrm{eval}}$和任务判定口径。任务层至少报告：任务完成率、带权按时完成率$1-J_{\mathrm{cmp}}$、deadline违反率、失败率和丢弃率；时延层报告平均端到端时延、P95、P99及归一化有效时延$J_{\mathrm{lat}}$。失败、丢弃和deadline违反必须分别统计，因为三者反映的系统原因不同。
+
+资源层至少报告总能耗、单位按时完成任务能耗、RB占用率、平均RB负载、CPU利用率以及Jain服务公平指数$1-J_{\mathrm{fair}}$。令一次评价轨迹中的总消耗能量为$E^{\mathrm{tot}}$，按时完成任务数为$N^{\mathrm{on}}:=\sum_{m\in\mathcal M^{\mathrm{eval}}}I_m^{\mathrm{on}}$，则单位按时完成任务能耗定义为
+
+$$
+E^{\mathrm{on}}
+:=
+\frac{E^{\mathrm{tot}}}{N^{\mathrm{on}}},
+\qquad
+N^{\mathrm{on}}>0.
+$$
+
+当$N^{\mathrm{on}}=0$时，$E^{\mathrm{on}}$记为N/A，并同时报告任务服务完全失败。任何缺少真实能量、CPU或RB字段的数据集只报告其可审计子集，不得以零填充。安全与服务约束层报告各SLA违反率、平均违反幅度、未来风险预警的precision与recall、安全壳拒绝率以及回退率；实际执行动作的硬约束违反率必须为$0$，非零即表示方法不满足可部署边界，不能由其他指标补偿。
+
+闭环决策评价只在状态rollout、结构合法性、守恒和校准达到预先冻结的基础门后启用。令真实系统中候选集合$\mathbb A_t^{\mathrm{cand}}\subseteq\mathbb A_t^{\mathrm{feas}}$内最优动作的真实代价为$J_t^{\star}$，PI-JWM辅助选择动作的真实代价为$J_t^{\mathrm{sel}}$，则决策regret为
+
+$$
+\operatorname{Regret}_t
+:=
+J_t^{\mathrm{sel}}-J_t^{\star}.
+$$
+
+两层目标应分别报告任务服务损失regret和第二层代价regret，不能用加权总regret掩盖任务服务下降。诊断指标还包括top-1动作一致率、pairwise ranking accuracy或Kendall相关系数，以及闭环任务完成率、P95/P99时延、能耗、资源利用率、安全壳拒绝率和回退率。动作排序只是状态预测之后的诊断接口，不替代PI-JWM的严格双图状态rollout主线。
+
+**（5）泛化、效率与统计报告规范。**
+
+模型需要分别在跨seed、跨负载、跨拓扑、跨场景和真实数据外部验证上报告结果，并将matched test、OOD test和external holdout明确分开。效率指标至少包括单次rollout或单次决策的P50/P95推理时延、峰值显存或内存、单位时间处理样本数，以及因不确定性或安全检查触发的回退率。
+
+每项正式实验必须保留每个seed或独立真实轨迹的原始结果，汇报样本数、均值、标准差和$95\%$置信区间。方法比较优先使用相同seed、场景和外生随机数形成配对样本，并采用配对bootstrap或与数据分布相符的配对检验，同时报告效应量；不能只报告$p$值。数据划分、指标公式、阈值、主次指标和停止规则必须在查看锁定测试结果前冻结。所有缺失字段统一记为N/A并说明原因，不得写成$0$；各类指标分别呈现，不构造一个未经应用依据验证的单一总分。
+
+## 四、PI-JWM总体方法
+
+### 1. 总体架构与运行流程
+
+PI-JWM当前只固定“版本化双图数据协议—可替换双图世界模型—可替换策略器—统一评价器与安全壳—真实执行反馈”这一方法体系，不预先固定某一种神经网络。世界模型和策略器属于同一个PI-JWM决策框架，但保持独立损失、独立优化器和清晰的信息边界；各模块的具体方法必须在同数据、同划分、同预算和同指标下完成消融与组合复验后再定型。
+
+```mermaid
+flowchart LR
+    ENV["AirFogSim或真实系统"] --> LOG["原始观测、动作与后继日志"]
+    LOG --> CONTRACT["PIJWM-DG-Contract（版本化）"]
+    CONTRACT --> GRAPH["物理图＋信息图＋显式耦合"]
+    GRAPH --> EXPLICIT["当前显式状态"]
+    GRAPH --> BELIEF["当前隐式belief"]
+    EXPLICIT --> WM["候选动作条件动力学"]
+    BELIEF --> WM
+    WM --> LATENT["未来隐式状态"]
+    LATENT --> DECODE["预测头生成未来显式状态"]
+    DECODE --> FUTURE["未来状态、任务结果与风险"]
+    EXPLICIT --> ACTOR["候选策略器"]
+    BELIEF --> ACTOR
+    ACTOR --> CAND["候选动作序列"]
+    CAND --> WM
+    FUTURE --> SCORE["目标评价与安全筛选"]
+    SCORE --> EXEC["只执行第一步动作"]
+    EXEC --> ENV
+```
+
+**显式状态与隐式状态同时生成并保留。** 数据协议中的物理节点、物理关系、信息代理、通信链路、数据流、任务/DAG、资源和动作字段构成显式状态，始终可追溯且不被单一latent替代；历史编码器生成隐式belief，保存单帧显式状态无法表达的历史和部分可观测信息。未来隐式状态经动作条件动力学递归，再由预测头生成未来显式状态。确定性阶段转换、动作写入和守恒关系由规则层更新，学习模块不得覆盖能够直接验证的显式事实。
+
+| 模块 | 已固定接口 | 本阶段候选方法 | 定型依据 |
+| --- | --- | --- | --- |
+| 字段编码 | 离散/连续/缺失mask分开处理，输出统一维度 | MLP＋LayerNorm、SimNorm式编码 | 字段级误差、多步误差、稳定性与复杂度 |
+| 物理图编码 | 只编码设备及空间、运动、环境关系 | R-MPNN、R-GCN、GATv2式关系注意力 | 同参数量下的物理状态与多步预测结果 |
+| 信息图编码 | 只编码代理、通信链路及通信/计算状态，参数不与物理图强制共享 | R-MPNN、R-GCN、GATv2式关系注意力 | 链路活动、速率、队列与任务结果 |
+| 双图耦合 | 只沿$\mathbf C^{IP}$和$\mathbf C^{EP}$交换消息 | 无耦合、concat、门控残差、关系约束cross-attention、JEPA式单向/双向latent耦合 | 正确关系优于打乱关系，并稳定改善多步预测与系统结果 |
+| 双状态生成 | 每步同时生成并保存显式状态$\widehat{\mathbf s}^{PI,\mathrm{exp}}$和隐式状态$\widehat{\mathbf b}^{-}$；神经开放环只把latent与下一动作传入动力学，显式状态进入规则更新、约束检查、loss、指标与解释，不把解码值无条件重新编码 | 显式分类型预测头；隐式状态比较Graph-GRU、Graph-RSSM和Transformer latent | 显式字段完整可评、隐式递归有效；规则层使用显式量时必须保持因果和守恒，不能注入未来真值 |
+| 世界模型belief与动力学 | 输入历史双图和动作，输出可递归的动作条件未来分布 | 确定性Graph-GRU、Graph-RSSM、图编码＋Transformer动力学 | $k=1/5/20$预测、概率质量、动作敏感性、运行成本 |
+| 预测输出 | 输出协议规定的显式状态、事件、任务和资源结果 | 分类型确定性头、异方差概率头、hurdle速率头 | 点预测、事件指标、NLL/校准与一致性 |
+| 候选生成器 | 只产生合法候选动作或动作序列，不读取候选的真实未来，不修改数据协议和系统目标 | 规则扰动、局部搜索、学习式候选生成 | 候选覆盖、合法率、动作支持度与生成开销 |
+| 世界模型规划器 | 对同一起始belief下的每个合法候选实际执行动作条件rollout，读取预测未来显式状态、任务结果、代价与风险，再按统一目标选择第一步动作 | 穷举短候选、采样式MPC/MPPI或其他受控搜索 | 候选预测误差、排序/regret、真实闭环收益、风险与运行时；只读取belief而不做候选rollout不属于该模块 |
+| 评价器与安全壳 | 系统目标、硬约束投影、回退规则和指标口径固定 | 不训练 | 所有方法共用，不参与方法竞争 |
+
+**训练组织采用方案B的“分阶段、可替换模块”原则，但不预先指定获胜模型。**
+
+1. **世界模型筛选阶段：** 使用AirFogSim真实日志中的“历史双图—已执行动作—真实后继”，逐项比较字段编码、图编码、跨图耦合、latent动力学和预测头；策略器不参与世界模型损失。
+2. **组合复验阶段：** 先做单模块控制变量消融，再把各模块中表现稳定的候选组成少量完整模型，以多个seed复验，不能直接把单项最优机械拼接为最终方法。
+3. **规划与策略阶段：** 只有世界模型通过状态rollout、结构合法性、守恒、动作敏感性和校准基础门后，才冻结候选世界模型。规则、搜索或学习模块可以负责生成候选，但正式PI-JWM决策必须让同一个冻结世界模型逐候选rollout，并由统一评价器比较预测后果；策略梯度在世界模型处`stop-gradient`。
+4. **部署阶段：** 候选生成器提出多组可行动作序列，冻结世界模型逐候选rollout，统一评价器按任务完成、时延、吞吐量、能耗、公平性和风险排序，安全壳复核后只执行第一步。若某个实现只用当前显式状态或belief直接对人工候选描述符打分，则它属于直接策略对照，不属于本段定义的世界模型规划器。
+5. **分布漂移处理：** 只有策略产生的状态—动作分布明显超出原日志支持时，才新增AirFogSim真实交互数据并重新训练世界模型；首版不进行世界模型与策略器端到端联合微调。
+
+Graph-RSSM＋门控双图耦合＋Masked Actor–Critic只作为当前参考候选，不再直接写成PI-JWM最终方法。优先完成计算量可控的模块消融；Transformer动力学、扩散动力学、采样式MPC和MCTS只有在现有候选无法达到基础门或有明确实验依据时才扩展，避免无边界地枚举模型。最终方法由完整结果决定，而不是由方法名称或主观判断决定。
+
+核心候选的同场景公平比较统一从随机初始化开始，并使用相同AirFogSim划分和调参预算。真实数据允许作为独立、可审计的辅助来源，用于与PI-JWM字段兼容的编码器自监督预训练、部分字段监督或外部验证；必须记录数据来源、单位、采样率、场景、可用字段和域差异，并设置“仅AirFogSim训练”的严格对照。真实数据不完整时不得补造任务、DAG、动作或反事实结果，也不得把局部真实数据验证描述成完整系统真实部署。
+### 2. 严格双图编码与跨图耦合
+
+物理图和信息图先分别编码，再沿显式耦合关系融合。令第$l$层物理节点、物理边、信息代理和信息通信边表示分别为$\mathbf h_{i,t}^{P,l}$、$\mathbf h_{ij,t}^{P,E,l}$、$\mathbf h_{u,t}^{I,l}$和$\mathbf h_{e,t}^{I,E,l}$。两张图使用独立参数的两层关系感知MPNN：
+
+$$
+\mathbf h_{i,t}^{P,l+1}
+=
+\Phi_{P,N}^{l}
+\left(
+\mathbf h_{i,t}^{P,l},
+\operatorname{Agg}_{j\in\Gamma_{i,t}^{P,-}}
+\Phi_{P,E}^{l}(\mathbf h_{j,t}^{P,l},\mathbf h_{ji,t}^{P,E,l})
+\right),
+$$
+
+$$
+\mathbf h_{u,t}^{I,l+1}
+=
+\Phi_{I,N}^{l}
+\left(
+\mathbf h_{u,t}^{I,l},
+\operatorname{Agg}_{e:\,d(e)=u}
+\Phi_{I,E}^{l}(\mathbf h_{s(e),t}^{I,l},\mathbf h_{e,t}^{I,E,l})
+\right).
+$$
+
+$\Phi_{P,E}^{l}$、$\Phi_{I,E}^{l}$为两层MLP边消息函数，$\Phi_{P,N}^{l}$、$\Phi_{I,N}^{l}$为带残差和LayerNorm的节点更新函数；聚合使用有效入边/出边计数归一化，padding不参与消息。
+
+节点级跨图消息只沿代理附着$\mathbf C_t^{IP}$传播，边级跨图消息只沿信息边—物理关系$\mathbf C_t^{EP}$传播：
+
+$$
+\overline{\mathbf H}_{t}^{P\rightarrow I}
+=
+\mathbf D_I^{-1}\mathbf C_t^{IP}\mathbf H_t^{P,N},
+\qquad
+\overline{\mathbf H}_{t}^{I\rightarrow P}
+=
+\mathbf D_P^{-1}(\mathbf C_t^{IP})^\top\mathbf H_t^{I,N}.
+$$
+
+信息通信边$e=(u_i,u_j,k)$通过$\mathbf C_t^{EP}$读取对应物理节点对$(i,j)$的相对几何和环境表示；反向消息将通信和计算产生的负载、能耗反馈写回其物理端点。下式门控残差是参考候选，必须与无耦合、concat、cross-attention及JEPA式耦合比较后再决定是否保留：
+
+$$
+\mathbf h_t^{\mathrm{fused}}
+=
+\operatorname{LN}
+\left[
+\mathbf h_t^{\mathrm{self}}
++
+\sigma(\mathbf W_g[\mathbf h_t^{\mathrm{self}}\|\overline{\mathbf h}_t^{\mathrm{cross}}])
+\odot
+\Psi(\overline{\mathbf h}_t^{\mathrm{cross}})
+\right].
+$$
+
+数据流通过$\mathbf C_t^{FL}$向信息通信边注入业务负载，任务通过$\mathbf C_t^{TI,q}$向对应信息代理注入源、持有、执行和结果接收状态；二者不绕过信息图直接连接物理节点。严格性检查固定为：代理附着唯一、信息边端点与物理端点一致、数据流端点与承载链路一致、DAG无环、资源守恒和padding掩码有效。
+
+任何沿用旧双图语义的实现，即使具有有向聚合、门控融合、动作条件递推或多头损失，也必须先把张量语义重映射到本定义，并重新通过数据契约与模型测试；旧语义checkpoint不能作为本定义下的正式模型。
+### 3. 动作条件联合动力学与多步rollout
+
+**（1）当前belief推断。** 编码后的图历史、资源历史和已执行动作共同形成当前belief：
+
+RSSM式belief是候选之一：GRU保存确定性历史记忆，对角高斯posterior编码当前观测中的随机latent，部署rollout只使用动作条件prior。任何实现若没有可执行的posterior/prior、KL项、部署时prior递归及相应测试，不得称为完整RSSM；它必须与确定性Graph-GRU等候选按同一协议和调参预算比较。
+
+$$
+\mathbf b_t
+\sim
+q_\phi
+\left(
+\mathbf b_t
+\mid
+\mathbf h_t
+\right).
+$$
+
+$\mathbf b_t$不是对最后一帧的简单复制，而应保存部分可观测系统中对未来有用的历史信息。其最低可检验要求是：预测等价的历史产生相近未来分布，不同合法动作产生可区分后果，任务服务所需差异不能在压缩中消失。
+
+**（2）规则层与学习层分工。** 对第$k$步候选动作，先由$\mathcal U^{\mathrm{det}}$更新卸载目标写入、RB计数、阶段合法转换、已知路径及剩余量守恒；再由随机动力学预测信道、有效服务量、到达、队列扰动和未观测资源变化：
+
+确定性规则更新固定保留，学习动力学不预先定型。任何候选都必须真正调用规则更新，并证明规则输出参与每一步rollout；只在文档或损失中声明规则、实际递归仍完全依赖latent和最后历史presence，不满足本定义。
+
+$$
+\widehat{\mathbf s}_{t+k}^{PI,\mathrm{det}}
+=
+\mathcal U^{\mathrm{det}}
+\left(
+\widehat{\mathbf s}_{t+k-1}^{PI,\mathrm{exp}},
+\mathbf a_{t+k-1}^{\mathrm{core}},
+\mathbf c_{t+k-1}^{\mathrm{avail}}
+\right),
+$$
+
+$$
+\widehat{\mathbf b}_{t+k}^-
+\sim
+p_\theta
+\left(
+\widehat{\mathbf b}_{t+k}^-
+\mid
+\widehat{\mathbf b}_{t+k-1}^-,
+\mathbf a_{t+k-1}^{\mathrm{core}},
+\mathbf c_{t+k-1}^{\mathrm{avail}},
+\widehat{\mathbf s}_{t+k}^{PI,\mathrm{det}}
+\right).
+$$
+
+规则层减少神经网络学习负担并保证显式状态不自相矛盾；学习层负责无法由当前规则精确计算的随机后果。规则残差仍进入第三部分训练损失，但训练损失不能替代执行前的硬约束检查。
+
+**（3）递归rollout与预测头。** 第一步以当前后验$\mathbf b_t$为起点，后续步骤使用模型自己的prior，不重新读入未来真值。每一步至少包含：物理状态头、链路活动头、条件活跃速率头、信息节点/边头、跨图关系头、资源头和任务服务结果头。链路活动与活跃速率采用hurdle结构更符合大量零链路数据：
+
+<span style="color:#d32f2f">预测头按变量类型固定：链路活动使用Bernoulli logit头；活跃速率使用Softplus正值MLP头；连续节点、资源和剩余量使用均值—对数方差MLP头；任务阶段使用softmax分类头；完成、超时和时延优先从预测生命周期推导并用辅助头做一致性检查。</span>
+
+$$
+\widehat R_{e,b,t+k}
+=
+\widehat p_{e,b,t+k}^{\mathrm{act}}
+\widehat R_{e,b,t+k}^{+},
+\qquad
+\widehat R_{e,b,t+k}^{+}>0.
+$$
+
+训练和评价必须分别检查活动事件与$R^+$，避免用大量零值把整体RMSE做得很好却不能预测真正工作的链路。任务结果头只能作为辅助：完成、超时和时延必须能够从预测生命周期、剩余量和deadline中一致地推导。
+
+**（4）动作可识别性。** 模型必须在相同起始状态和外生随机条件下区分不同动作。除第三部分的动作效果损失外，训练数据需要多策略日志、仿真器配对反事实或安全探索；只有单一历史策略时，模型只能在该策略支持附近使用。改变future action会改变神经网络输出只是实现级敏感性，不等于真实动作因果效应已经识别；还必须用真实配对后果验证方向、幅值与多步稳定性。
+
+<span style="color:#d32f2f">动作字段、阶段mask和可行域语义固定；embedding＋数值投影＋MLP只是参考动作编码器，需与更简单的one-hot/数值拼接和SimNorm式编码在相同动作敏感性测试下比较。</span>
+
+### 4. 不确定性感知规划与安全接口
+
+**（1）三类不确定性。** PI-JWM分别处理：数据噪声和不可约随机性形成的aleatoric uncertainty；有限数据和模型差异形成的epistemic uncertainty；模型冻结后由独立校准集构造的coverage guarantee。连续头输出均值与正定协方差或分位数，离散头输出事件概率，多个独立模型形成ensemble分歧，共形方法再把校准残差转换为有限样本预测区间。三者不能用同一个“置信度”字段混为一谈。
+
+<span style="color:#d32f2f">不确定性接口与校准集固定，但具体组合不预定：先比较确定性头与异方差概率头；只有点预测和概率评分达到基础门后，再增加deep ensemble与split conformal。不能在基础预测尚不可靠时用宽区间包装结果。</span>
+
+**（2）候选动作评价。** 规划器只在$\mathbb A_t^{\mathrm{feas}}$或其可审计候选子集内生成动作序列，使用预测分布估计第三部分定义的$J_{\mathrm{cmp}}$、$J_{\mathrm{sec}}$、软约束风险和尾部代价。第一层先排除任务服务明显劣化的动作，第二层再比较时延、能量、资源和公平性；不以一个未经校准的加权reward替代两层目标。
+
+<span style="color:#d32f2f">任务阶段mask、硬约束投影和统一评价器固定；候选生成方法不固定。先以保守基线＋合法局部扰动建立可审计下界，再与Masked Actor–Critic、PPO式策略及必要的采样式MPC比较；所有方法调用同一个候选世界模型并复用第三部分目标。</span>
+
+**（3）风险门与回退。** 若候选动作满足以下任一条件，则停止继续展开或触发回退：硬约束投影失败；动作—状态对超出训练支持；ensemble分歧或共形区间宽度超过冻结阈值；未来约束违反概率超过$\alpha_j^{\mathrm{risk}}$；推理时间超过时隙预算。回退动作必须来自预先验证的保守策略，而不是临时生成的新动作。
+
+<span style="color:#d32f2f">风险门采用冻结阈值规则，不训练一个不可解释的总置信度网络；输入依次为可行投影结果、动作支持度、ensemble分歧、共形区间宽度、约束违反概率和推理超时标志。</span>
+
+**（4）安全壳与一步执行。** 规划器输出的动作再次经过第三部分第3节全部硬约束检查：
+
+<span style="color:#d32f2f">安全壳采用确定性可行域检查与投影；若投影失败或风险门触发，则返回预先验证的保守基线动作。安全壳不使用世界模型预测值覆盖当前能够直接验证的硬约束。</span>
+
+$$
+\mathbf a_t^{\mathrm{safe}}
+=
+\operatorname{Shield}
+\left(
+\mathbf a_t^{\mathrm{plan}},
+\mathbf s_t^{PI,\mathrm{exp}}
+\right)
+\in
+\mathbb A_t^{\mathrm{feas}}.
+$$
+
+只有$\mathbf a_t^{\mathrm{safe}}$可以执行。MBPO、MOPO和COMBO提示规划器会利用模型误差及数据支持外动作，因此PI-JWM首版采用短视野、支持度检查、风险惩罚和安全回退，不追求无限长的想象规划。selector或动作排序只作为该接口的后置诊断，不是PI-JWM主方法。
+
+## 五、理论依据与创新分析
+
+### 1. 方法来源与相关工作对比
+
+本节只把原始论文作为正式方法证据。本地综述用于组织路线，不替代原始论文；尚未核验发表状态的2025—2026年预印本只作为方向线索。本节选择与第四部分模块直接相关的核心论文，每篇单独说明所属模块、主要方法、局限、对PI-JWM的启发以及PI-JWM相对于该文的改造；“相对创新”仍是待实验验证的差异，不等于已经成立的论文贡献。
+
+**（1）逐篇核心文献比较。**
+
+| 所属模块 | 文献 | 主要方法 | 原文局限 | 对PI-JWM的启发 | PI-JWM相对于该文的候选创新或改造 |
+| --- | --- | --- | --- | --- | --- |
+| 动作条件世界模型 | Ha与Schmidhuber，World Models，2018，[arXiv:1803.10122](https://arxiv.org/abs/1803.10122) | VAE压缩图像，MDN-RNN学习latent动力学，小控制器在模型想象中决策 | 主要验证视觉控制和简单环境；依赖像素重建，缺少无线约束、图结构和校准不确定性 | 固定“表示—动力学—外部决策”的基本分工 | 用严格物理—信息双图代替视觉latent，以任务/资源预测代替像素重建，并保持策略器在PI-JWM外部 |
+| 概率belief与规划 | Hafner等，PlaNet，ICML 2019，[PMLR 97](https://proceedings.mlr.press/v97/hafner19a.html) | RSSM结合确定性记忆和随机latent，使用posterior/prior学习部分可观测动力学，并用CEM在latent中规划 | 面向连续视觉控制；没有离散组合动作、图守恒、协议硬约束和真实网络数据缺失问题 | 采用RSSM式belief、prior/posterior和递归rollout | 在RSSM前后加入设备空间关系图、代理通信链路图、显式耦合、确定性任务/资源规则、离散卸载/RB可行域和分类型预测头 |
+| latent想象策略 | Hafner等，Dreamer，ICLR 2020，[OpenReview](https://openreview.net/forum?id=S1lOTC4tDS) | 在学习到的latent imagination中训练actor和value，减少真实环境交互 | actor与世界模型训练联系紧密；原任务没有无线硬约束，策略可能利用模型偏差 | 说明多步latent后果能够服务决策，而不必重建全部观测 | 首版不把actor塞进世界模型，而是让外部生成器提交可审计候选动作，再通过目标函数和安全壳选择 |
+| 任务相关latent与MPC | Hansen等，TD-MPC2，ICLR 2024，[arXiv:2310.16828](https://arxiv.org/abs/2310.16828) | 学习任务相关latent动力学、奖励和价值，并使用短视野MPC进行连续控制 | 主要面向连续控制基准；没有显式概率校准、异构双图、DAG任务和资源守恒 | latent只需保留对控制有用的未来差异，短视野规划比无限rollout更稳健 | 将task-sufficient latent定义为能够保留物理—任务—资源后果，规划对象改为离散组合动作并加入不确定性门和硬约束 |
+| 表征预训练 | Assran等，I-JEPA，CVPR 2023，[DOI](https://doi.org/10.1109/CVPR52729.2023.01499) | context encoder预测target encoder的图像块embedding，避免重建无关像素细节 | 是静态图像自监督方法；没有动作、时间动力学、概率分布、图约束或任务结果 | 可以用embedding预测约束编码器学习任务相关表示 | 只把JEPA作为可选预训练/一致性损失，正式PI-JWM额外建模动作条件概率动力学和严格双图合法性 |
+| 通用图消息传递 | Battaglia等，Graph Networks，2018，[arXiv:1806.01261](https://arxiv.org/abs/1806.01261) | 以edge、node和global更新函数构造统一消息传递框架，强调关系归纳偏置 | 是通用架构原则，不给出无线状态、双图耦合、时间转移或可行域 | 用独立边/节点更新和置换等变聚合编码结构 | 为物理图和信息图定义不同参数与语义，并把代理附着和信息边—物理端点对应两类跨图关系接入动作条件rollout，而非只做静态图推理 |
+| 关系类型编码 | Schlichtkrull等，R-GCN，ESWC 2018，[DOI](https://doi.org/10.1007/978-3-319-93417-4_38) | 对不同关系类型使用关系专属变换和参数共享，服务知识图谱表示与链接预测 | 主要处理静态知识图谱；关系数增加会带来参数与数据稀疏问题，也不处理连续动力学 | 不同信息边和跨图关系不能共享一个无类型邻接矩阵 | PI-JWM只保留物理上有定义的少量关系类型，并将关系消息与动作、任务阶段和时间转移共同建模 |
+| 双网络与显式层间依赖 | Yağan等，IEEE TPDS 2012，[DOI](https://doi.org/10.1109/TPDS.2012.62) | 将CPS表示为两个具有各自节点和层内边的交互网络，并以跨网络连接和依赖矩阵描述层间作用 | 研究级联失效和鲁棒性；不定义移动无线MEC的代理、空间邻域、任务或时间动力学 | 两张图应保持各自节点与层内边语义，跨层关系必须显式保存而不是隐藏在特征拼接中 | PI-JWM把这一结构原则实例化为物理设备—空间关系图、信息代理—通信链路图以及$\mathbf C^{IP}/\mathbf C^{EP}$，具体语义仍由数据契约和消融实验验证 |
+| 严格多层网络定义 | Kivelä等，Multilayer Networks，2014，[DOI](https://doi.org/10.1093/comnet/cnu016) | 用层内边、层间边和节点层对应关系统一描述多层网络 | 提供数学分类而非可训练预测模型；没有动作、latent或规划 | 严格区分两张图及跨层关系，避免把双图误写成简单特征拼接 | 在多层网络定义上增加可学习的双向关系消息、动作条件联合动力学和逐步合法性检查 |
+| 物理—信息网络架构 | Egerstedt，From Algorithms to Architectures in Cyber-Physical Networks，2015，[DOI](https://doi.org/10.1080/23335777.2015.1056234) | 将物理耦合图与计算节点之间的信息流图分开，并通过感知/执行形成闭环 | 是控制架构层面的概念框架，不给出无线任务卸载数据契约或世界模型 | 信息层必须具有真实计算/通信端点和信息流，而不是把抽象任务直接当网络节点 | PI-JWM将该分层原则实例化为设备—空间关系物理图、附着代理—通信链路信息图及动作条件rollout |
+| 网络化系统双层耦合 | Hammad、Farraj、Kundur，On Cyber-Physical Coupling and Distributed Control in Smart Grids，2019，[作者公开PDF](https://www.comm.utoronto.ca/dkundur/pub_pdfs/HamFarKunTII19.pdf) | 物理层使用设备/线路，信息层使用cyber agent/通信链路，并显式描述层间附着 | 面向电力系统，拓扑和控制对象与移动无线MEC不同 | 信息代理可附着于物理设备，两层节点不必用同一种边语义 | PI-JWM把通信/计算/服务代理附着到车辆、UAV和RSU，并进一步记录信息通信边的物理端点对应及数据流—链路关系 |
+| 无线RRM图学习 | Shen等，IEEE JSAC 2021，[DOI](https://doi.org/10.1109/JSAC.2020.3036965) | 将无线RRM表示为图优化问题，以通信实体为节点并把信道状态作为无线图边特征，用共享GNN学习可扩展、置换等变的资源分配映射 | 主要是当前无线图快照到资源动作的单步映射；没有独立物理空间图、任务DAG、状态rollout和校准不确定性 | CSI、信道增益和干扰关系应编码在通信/信息图边上，而不是混入只表达设备空间关系的物理图 | PI-JWM保留其通信边特征语义，但增加独立物理图、$\mathbf C^{IP}/\mathbf C^{EP}$显式耦合和动作条件多步状态预测，再由外部规划器选择动作 |
+| 网络KPI图预测 | Ferriol-Galmés等，RouteNet-Fermi，TNET 2023，[DOI](https://doi.org/10.1109/TNET.2023.3269983) | 在路径、链路和队列实体间迭代消息传递，预测不同拓扑和流量配置下的网络性能 | 主要面向有线/分组网络KPI；输入配置通常已给定，没有无线传播、任务DAG和反事实卸载动作 | 网络状态预测可以使用异构实体之间的结构化消息传递 | PI-JWM把性能图预测扩展到设备空间关系物理图与代理通信链路信息图，并递归预测动作导致的任务、资源和链路共同变化 |
+| 知识展开资源分配 | Yang等，WMMSE-unrolled GNN，IoT-J 2024，[DOI](https://doi.org/10.1109/JIOT.2024.3368516) | 将WMMSE迭代知识展开到GNN中，使无线资源分配兼具模型先验和学习能力 | 目标是直接求资源动作；依赖特定优化结构，不学习长期环境转移或任务生命周期 | 可精确计算的通信知识应作为结构模块而非全部交给黑箱网络 | PI-JWM采用“确定性规则层 + 学习动力学”分工，但输出未来状态分布而不是复刻一个特定优化器的动作 |
+| 图学习任务卸载 | Li等，GASTO，TNSM 2023，[DOI](https://doi.org/10.1109/TNSM.2023.3250395) | 学习动态图表示并快速生成边缘任务卸载决策 | 重点是直接、快速地产生卸载动作；没有可校准多步世界模型和严格物理承载关系 | 网络状态与业务需求的联合信息有助于卸载决策且需要考虑动态图变化 | PI-JWM把图学习从直接动作映射改为候选动作后果预测，并显式检查代理附着、通信边端点和流—链路路径 |
+| CSI latent动力学 | Bou Chaaya、Girgis、Bennis，WCL 2025，[DOI](https://doi.org/10.1109/LWC.2024.3510943) | 将高维CSI压缩到latent并学习其时间动力学，服务未来无线状态预测 | 信息链路侧以CSI为中心；没有任务图、卸载/RB联合动作、资源守恒和完整任务结果 | 真实CSI可用于信息链路latent预训练和传播动态校准 | PI-JWM允许CSI缺失时使用SINR、RSRP或速率等部分观测，并联合rollout信息图、任务和资源状态 |
+| 耦合JEPA多模态无线规划 | Bou Chaaya、Girgis、Bennis，TWC 2026，[DOI](https://doi.org/10.1109/TWC.2025.3644600) | 以控制JEPA学习图像—动作latent动力学，再冻结控制编码器，用控制latent条件预测CSI latent；通过EMA target、ensemble不确定性和MPC/MPPI完成调度与功率规划 | 耦合方向主要是控制状态到无线CSI的单向条件作用，每个设备单独建模，并依赖较稳定传播环境和较弱设备间影响；没有PI-JWM的真实双层网络、卸载/队列/CPU和资源守恒 | 不同模态应使用各自编码器与预测器，并通过有因果依据的latent条件关系耦合；latent预测必须用多步任务结果、资源代价和不确定性校准共同检验 | 先把耦合JEPA作为可证伪的结构假设：在新双图语义下比较独立双分支、物理到信息单向耦合和关系约束双向耦合，同时保留显式可观测状态头；消融稳定获益前不升级为PI-JWM主方法 |
+| 模型式MAC决策 | Park、Chae、Choi，IoT-J 2024，[DOI](https://doi.org/10.1109/JIOT.2023.3325575) | 学习无线信道接入环境模型，并利用模型生成的后果改进深度强化学习策略 | 控制对象集中于信道接入，状态与结果范围较窄；没有DAG任务、联合资源和严格双图 | 无线MAC同样可以通过动作条件模型减少真实交互并做what-if评估 | PI-JWM将动作扩展为阶段合法的卸载与RB组合，预测完整联合状态，并把策略器与世界模型明确解耦 |
+| DAG直接策略 | Wang等，Dependent Task Offloading，TC 2022，[DOI](https://doi.org/10.1109/TC.2021.3131040) | 将依赖任务卸载建模为序贯决策问题，使用深度强化学习处理DAG前驱和边缘资源 | 直接学习策略，结果依赖训练环境与reward；不提供可独立校准的状态转移模型 | DAG前驱完成条件和卸载动作必须进入状态与可行域 | PI-JWM不直接模仿其策略，而是学习DAG状态在不同动作下的未来演化，供多种外部策略共同调用 |
+| 边—云依赖卸载 | Chen等，Dependency-Aware Computation Offloading，TCC 2022，[DOI](https://doi.org/10.1109/TCC.2020.3037306) | 联合考虑子任务依赖、边缘—云协作和计算/通信资源的卸载优化 | 主要解决给定模型下的优化问题；传播和服务模型由假设给定，不学习未知动力学 | 任务依赖、边云执行位置和通信—计算耦合必须显式写入约束 | PI-JWM保留这些显式约束，同时学习模型无法精确给出的传播、排队和服务扰动 |
+| 多跳多DAG卸载 | Sahni等，Multihop Offloading of Multiple DAG Tasks，IoT-J 2021，[DOI](https://doi.org/10.1109/JIOT.2020.3030926) | 联合处理多个DAG任务、多跳传输和协作边缘执行 | 优化依赖已知网络参数和任务模型；不处理部分可观测性、预测校准与真实域迁移 | 子任务依赖应保留为独立任务DAG；只有跨代理传输的依赖数据才成为信息流并映射到物理路径 | PI-JWM在rollout中分别检查任务DAG阶段、数据流剩余量、信息通信路径和资源守恒，不再把DAG边直接等同于信息网络边 |
+| deadline约束DAG调度 | Liu等，JSAC 2023，[DOI](https://doi.org/10.1109/JSAC.2022.3233532) | 联合依赖任务调度与卸载，以deadline违反率为核心服务指标 | 主要优化deadline结果，未学习可复用的动作条件联合动力学，也未覆盖无线状态不确定性 | deadline violation不能只作为训练reward，应成为任务结果和风险指标 | PI-JWM从预测生命周期推导超时概率，并将其用于候选筛选、共形风险区间和闭环评价 |
+| 实时依赖/并行卸载 | Chen等，TPDS 2024，[DOI](https://doi.org/10.1109/TPDS.2023.3349177) | 使用深度强化学习对云—边环境中的依赖与并行任务进行实时卸载 | 仍是环境特定的直接策略；缺少模型可解释rollout、硬约束证明和不确定性回退 | 候选动作生成器可以学习，但不能因此省略任务阶段和可行性mask | PI-JWM把学习策略降为可替换的外部候选生成器，核心贡献放在可审计的联合状态预测和安全选择 |
+| 短模型rollout | Janner等，MBPO，NeurIPS 2019，[arXiv:1906.08253](https://arxiv.org/abs/1906.08253) | 使用概率动力学ensemble生成短模型轨迹并与真实数据共同训练策略 | 面向连续控制且仍可能受到模型偏差；不提供无线图约束与安全可行域 | 短rollout通常比盲目增加想象长度更可靠 | PI-JWM固定报告1/5/20步误差，并用不确定性和状态基础门决定是否允许进入候选动作评价 |
+| OOD不确定性惩罚 | Yu等，MOPO，NeurIPS 2020，[arXiv:2005.13239](https://arxiv.org/abs/2005.13239) | 在离线模型式RL中用模型不确定性惩罚预测奖励，降低支持外动作的乐观偏差 | 不确定性惩罚可能过保守且依赖ensemble质量；没有离散无线硬约束 | 规划器必须识别数据支持外动作而不能只看预测均值 | PI-JWM把支持度、ensemble分歧和约束违反概率分开报告，并使用安全回退而非单一惩罚reward |
+| 保守离线模型学习 | Yu等，COMBO，NeurIPS 2021，[arXiv:2102.08363](https://arxiv.org/abs/2102.08363) | 将模型生成数据与保守价值学习结合，抑制离线数据之外的价值高估 | 重点仍是离线RL价值优化；难以直接解释每类状态预测误差和结构合法性 | 候选动作排序需要对模型利用和价值高估保持保守 | PI-JWM先通过状态、结构、守恒和校准基础门，再开放后置决策接口，不把selector性能替代世界模型正确性 |
+| epistemic uncertainty | Lakshminarayanan等，Deep Ensembles，NeurIPS 2017，[arXiv:1612.01474](https://arxiv.org/abs/1612.01474) | 独立初始化并训练多个概率网络，用成员分歧和混合预测提高不确定性质量 | 计算和存储开销成倍增加；分歧不自动等于OOD检测，也没有有限样本覆盖保证 | 用独立模型分歧识别高风险状态—动作区域 | PI-JWM将ensemble分歧分别落实到物理、任务和资源预测头，并检验其与真实误差、约束失败的相关性 |
+| 概率校准 | Guo等，ICML 2017，[PMLR 70](https://proceedings.mlr.press/v70/guo17a.html) | 系统分析神经网络失校准，并使用temperature scaling进行后处理 | 主要针对分类置信度；不能校准全部结构化连续轨迹，也不提供分布漂移保证 | 链路活动和任务事件概率必须在独立验证/校准集上检查可靠性 | PI-JWM对离散头做温度校准，同时对连续和多步输出另外使用概率评分与共形区间，不用一个ECE代表全部不确定性 |
+| 共形预测 | Angelopoulos与Bates，2023，[DOI](https://doi.org/10.1561/2200000101) | 使用独立校准残差构造分布无关、有限样本覆盖的预测集合或区间 | 经典保证依赖交换性；分布漂移、时序相关和多维联合覆盖需要额外处理，区间可能很宽 | 模型冻结后可给关键任务时延、速率和资源预测增加可审计覆盖区间 | PI-JWM按时域、场景和目标类型校准coverage—width，并把区间过宽作为回退信号，而不是把共形方法写成训练损失 |
+
+**（2）各模块文献的共性缺陷。** 通用世界模型擅长latent rollout，但通常把环境表示为单一向量或视觉latent，缺少无线协议、真实信息流和资源守恒；无线GNN擅长拓扑归纳偏置，但多数直接从当前图映射到动作或单步KPI，不学习动作条件多步联合动力学；无线world-model近邻主要集中于CSI、接入或物理侧多模态规划，没有同时表示设备空间关系与代理通信链路的双层动态网络；DAG卸载研究具有完整任务约束，但通常直接求策略或优化解，且DAG是任务图而非信息网络；不确定性文献分别处理ensemble、温度或覆盖区间，却很少与无线硬约束、任务生命周期和安全回退形成一个闭环。
+
+**（3）PI-JWM相对于上述文献的候选创新。** 第一，保持物理图和信息图语义独立，并以代理—设备附着和信息边—物理端点对应两类真实关系严格耦合，任务DAG仅作为产生信息流的辅助结构；第二，将确定性任务/资源规则与RSSM式随机latent动力学分离，在卸载与RB候选动作条件下联合rollout物理、信息、资源和任务结果；第三，把策略器与世界模型使用独立损失和优化器，使同一个PI-JWM能够公平比较规则、搜索或学习策略生成的候选动作；第四，用分类型概率头、deep ensemble、共形校准、支持度检查和确定性安全壳形成“不确定性—风险—回退”链；第五，以仿真—真实统一数据契约和缺失mask维持证据边界，而不是假设每个数据源都有完整CSI、信息流、任务DAG、动作和资源标签。
+
+上述五点目前仍是候选创新。当前先用严格双图/单图/无耦合与多种耦合消融、多步动作敏感性、守恒检查、不确定性校准和闭环regret建立核心证据；基座模型预训练、场景迁移和真实数据外部迁移统一后移，不作为当前方法定型的前置条件。核心结果稳定后再用这些扩展检验泛化能力。
+
+### 2. 可证明性质与理论边界
+
+**（1）辅助任务DAG无环性——条件性定义，不再作为信息图性质。** 若任务$m$具有子任务图$\mathcal H_m^T$，并要求每条依赖边$(u,v)\in\mathcal D_m^T$都满足拓扑序$\rho_m(u)<\rho_m(v)$，则假设存在有向环$u_1\rightarrow u_2\rightarrow\cdots\rightarrow u_L\rightarrow u_1$会推出
+
+$$
+\rho_m(u_1)
+<
+\rho_m(u_2)
+<
+\cdots
+<
+\rho_m(u_L)
+<
+\rho_m(u_1),
+$$
+
+与实数严格序的传递性矛盾，因此$\mathcal H_m^T$无环。该证明只约束辅助任务图；信息图$\mathcal G_t^I$是代理之间的通信链路图，可以因双向链路、反馈或控制交互出现环，不能宣称其必为DAG。
+
+**（2）信息代理附着唯一性——定义上的条件命题。** 对每个活动信息代理$u$，$[\mathbf C_t^{IP}]_{ui}\in\{0,1\}$且$\sum_i[\mathbf C_t^{IP}]_{ui}=1$。二元变量之和等于$1$意味着存在且仅存在一个物理节点$i$使$\pi_t(u)=i$。这保证首版代理附着唯一，但不证明数据导出天然正确；必须逐样本核对代理ID、物理节点ID和存在掩码。若以后同一服务代理允许跨设备迁移或复制，需要显式修改该定义，不能暗中放宽。
+
+**（3）信息通信路径合法性——条件命题与验收要求。** 对每条获得服务的数据流$f$，若二元变量$\beta_{f,e,t}$在信息图上满足源代理净流出为$1$、目的代理净流入为$1$、其他代理流入等于流出、每个中间代理入度和出度不超过$1$，并额外排除子环，则被选通信边构成源代理到目的代理的一条有向简单路径。流守恒排除断裂，度约束排除分叉，子环消除约束排除与主路径无关的闭环。连续路径由显式可行域保证，不由attention隐式生成；实现必须逐样本验证这些条件。
+
+**（4）消息传递的置换等变性——理论性质与测试要求。** 设$P$是节点排列矩阵，共享消息函数作用于每条邻接边，聚合采用求和。排列后每个节点接收的消息集合只改变顺序，而求和对顺序不敏感，因此
+
+$$
+\operatorname{GNN}
+\left(
+P\mathbf X,
+P\mathbf A P^\top
+\right)
+=
+P\operatorname{GNN}(\mathbf X,\mathbf A).
+$$
+
+每个正式图模块都必须通过边顺序等变和端点索引敏感性测试。即使测试通过，也只证明实现遵循相应图索引性质，不证明模型已经泛化到任意规模或真实网络。
+
+**（5）安全壳输出可行性——条件命题与实现门槛。** 若$\operatorname{Shield}$只在$\boldsymbol\delta_t^{\mathrm{hard}}=\mathbf0$时返回候选动作，否则返回一个预先验证的保守动作，且保守动作也属于$\mathbb A_t^{\mathrm{feas}}$，则其输出必属于$\mathbb A_t^{\mathrm{feas}}$。这是由可行域定义直接得到的条件命题；工程实现还必须证明候选检查和保守动作均真实执行，不能仅凭流程图或函数名称宣称成立。
+
+**（6）多步误差到系统代价误差的条件上界——证明成立条件已明确。** 假设真实转移对状态是$L_F$-Lipschitz，模型在数据支持内的一步误差不超过$\varepsilon_F$，轨迹代价对状态是$L_J$-Lipschitz，且模型与真实系统使用同一动作序列，则第$k$步状态误差满足
+
+$$
+\left\|
+\widehat{\mathbf s}_{t+k}^{PI}
+-
+\mathbf s_{t+k}^{PI}
+\right\|
+\le
+\varepsilon_F
+\sum_{r=0}^{k-1}L_F^r,
+$$
+
+从而$K$步累计代价误差满足
+
+$$
+\left|
+\widehat J_{1:K}-J_{1:K}
+\right|
+\le
+L_J\varepsilon_F
+\sum_{k=1}^{K}
+\sum_{r=0}^{k-1}L_F^r.
+$$
+
+证明由一步误差的三角不等式递推和代价Lipschitz条件直接得到。该界解释了为什么rollout越长风险越大，但它不证明神经网络在OOD动作上仍有有限$\varepsilon_F$，也不证明latent对所有任务充分；动作支持外、拓扑突变或真实数据漂移时必须重新估计或拒绝使用该界。
+
+### 3. PI-JWM候选创新点与证据要求
+
+| 候选贡献 | 与已有工作的区别 | 升级为论文贡献前必须提供的证据 |
+| --- | --- | --- |
+| 严格物理—信息双图 | 不把设备空间关系、通信链路和任务DAG拼成同质单图；信息层使用真实代理与通信边，显式保留代理附着、端点对应和流—链路关系 | 非空通信边与数据流、附着唯一性、端点/路径一致性、双图/单图/无耦合消融 |
+| 显式规则与latent动力学分离 | 世界模型不重复猜测阶段、动作写入和守恒量 | 规则残差、守恒违反率、去规则层消融 |
+| 动作条件联合状态rollout | 从单一CSI或链路速率扩展到物理、任务、资源和跨图关系 | 配对动作结果、动作敏感性、1/5/20步指标、任务结果一致性 |
+| 面向任务服务的多头预测 | 不把低RMSE直接等同于调度收益 | 状态指标基础门、任务完成/时延/资源指标及闭环regret |
+| 不确定性感知规划与安全回退 | 将协方差、ensemble、共形区间、OOD和硬约束分层处理 | NLL/CRPS、覆盖率—宽度、风险识别、回退率、零硬约束违反 |
+| 仿真—真实混合数据契约 | 不假定单一数据源包含所有字段，用掩码维护证据边界 | 数据字段矩阵、跨数据校准、external holdout和domain shift报告 |
+
+创新点只有在相应证据通过后才能升级为论文贡献。实验未完成前，文档统一使用“候选创新”“拟验证贡献”或“目标版方法”，避免把架构设想直接写成已经成立的研究结论。
+
+## 六、数据、实验与方法定型规范
+
+本节只规定长期有效的证据标准和方法门槛，不记录某次运行是否完成、某个版本的分数或阶段性任务状态。自2026年8月12日起，所有真实推进、阻塞、实验结果和技术细节统一记录在《8.12之后推进》。
+
+### 1. 数据来源与证据等级
+
+PI-JWM允许使用仿真数据、真实测量数据和公开数据，但所有字段必须标注来源与可验证性，不能用固定值、代理量或异常回退值冒充真实观测。
+
+| 证据等级 | 定义 | 使用边界 |
+| --- | --- | --- |
+| direct | 数据源直接产生且语义与协议一致 | 可作为输入、监督目标或评价真值 |
+| derived | 由direct字段按已记录公式计算 | 必须保存依赖字段、公式、单位和版本 |
+| fixed_config | 场景配置中的常量或控制量 | 可作为条件输入，不得描述为逐时隙测量 |
+| unavailable | 当前数据源无法提供或语义不可靠 | Mask必须为false；不得用零值补齐后标为有效 |
+
+信息边特征数量不是优化目标。最终字段集必须通过“最小可靠集、可恢复增强集、新采集增强集”的受控消融决定；如果更少但可靠的信息能取得相当效果和更低开销，应优先采用精简协议。
+
+### 2. 严格双图数据契约
+
+每个样本必须包含时间对齐的物理图、信息图、历史状态、动作、后继状态和任务演化结果，并满足以下约束：
+
+- 节点、边和特征均有稳定ID、单位、来源等级、有效性Mask与缺失原因；
+- 信息边只描述真实存在或可定义的通信关系，物理边与信息边不得通过改名相互替代；
+- 异常、缺失和不适用字段必须显式失效，不能“异常置零同时Mask为真”；
+- 动作必须能与其作用前状态和作用后结果配对，采集时序必须由测试锁定；
+- 训练、验证、测试按场景或随机种子隔离，保存配置哈希、数据哈希、代码版本和manifest；
+- 新协议使用新数据版本，不覆盖历史产物；旧结果仅在其原协议和配置范围内有效。
+
+### 3. 真实数据辅助原则
+
+真实数据可以用于链路/传播编码器预训练、可对齐字段的部分监督、域适配或外部验证。每次使用必须同时报告字段映射、覆盖范围、不可对齐部分、域差异和数据许可，并保留纯AirFogSim对照。真实数据不完整时只能对可观测子空间施加损失，不能臆造任务、动作或反事实标签。
+
+### 4. 理论—实现一致性门
+
+任何模块进入正式实验前，都必须建立“理论定义—代码入口—输入输出—测试—artifact—指标口径”的逐项映射。名称不能替代机制：
+
+- “基于世界模型候选Rollout的规划器”必须对每个候选动作或动作序列调用世界模型，得到候选相关的未来状态/任务/成本/风险预测，并据此选择动作；
+- 只使用当前belief和候选描述符直接打分的策略属于belief-conditioned direct policy，可作为对照，但不是上述规划器；
+- “RSSM”必须实际包含可检验的先验、后验、KL训练目标和部署时先验递推；
+- “规则约束递推”必须在每一步rollout中真实调用规则更新，并影响后继显式状态；只保留上一帧或静态图不满足该定义；
+- “因果/反事实有效”必须有配对干预结果或等价可验证设计；仅有未来动作敏感性不能单独证明因果正确性。
+
+发现不一致时，先停止扩大训练，再选择实现理论、收缩/修改理论或补充证明。未通过一致性门的模块只能标为候选、接口或历史原型。
+
+### 5. 模块选择与超参数调优
+
+模块不能只按单次最优分数选择。每个候选必须先说明其归纳偏置为何适合移动通信、任务演化、严格双图或部分可观测场景，再在相同数据划分、评价预算和调参预算下比较。至少记录搜索空间、搜索方法、随机种子、早停规则、最优配置与方差；不能给PI-JWM充分调参而让baseline沿用明显不合适的默认值。
+
+### 6. 世界模型基础验收门
+
+世界模型至少需要覆盖：
+
+- 单步以及1/5/20步rollout；
+- 节点状态、链路活动、分配RB上的有效速率、任务剩余量/完成状态；
+- 对动作的可验证响应，而非只复制历史趋势；
+- 图结构合法性、资源守恒、任务状态机和动作可行性；
+- 不确定性或风险输出的校准质量；
+- 跨种子、跨负载或跨场景泛化与运行开销。
+
+所有指标必须定义Mask、聚合层级、单位、分母和置信区间。是否采用某一具体网络结构由受控实验决定，阶段候选不能提前写成最终方法。
+
+### 7. 候选Rollout规划与真实闭环
+
+理想规划闭环的固定语义如下：
+
+1. 从在线历史构造严格双图观测并推断当前belief；
+2. 生成满足动作约束的候选动作或动作序列；
+3. 对每个候选从同一belief出发调用世界模型进行多步rollout；
+4. 从预测轨迹计算任务完成、时延、能耗、资源违约、不确定性或风险成本；
+5. 依据统一目标选择候选，并记录选择依据；
+6. 仅执行首个动作，接收真实环境反馈；
+7. 更新历史与belief后重新规划。
+
+第6—7步构成执行反馈闭环，第3—5步构成世界模型规划闭环；两者缺一不可。可以保留无rollout直接策略、真实环境oracle或启发式策略作为对照，但必须使用准确名称。
+
+### 8. 指标、baseline与创新证据
+
+正式报告需同时给出世界模型预测指标、规划/控制指标、效率指标、鲁棒性与不确定性指标。baseline应覆盖无世界模型策略、单图模型、无动作条件模型、无规则约束模型、代表性图时序世界模型或任务卸载方法，并明确可复现性和适配改动。
+
+创新结论必须落到可检验差异：严格物理—信息双图表示、动作条件联合状态预测、规则与学习递推、基于预测轨迹的闭环规划、部分真实数据辅助或更少可靠信息下的效率优势。每项创新都必须有对应消融或对比，不能仅凭模块命名成立。
+
+### 9. 方法冻结与失败处理
+
+方法只有在数据协议、一致性门、核心指标、超参数预算、关键消融和闭环测试通过后才能冻结。冻结时记录代码版本、配置、数据manifest、权重、环境和完整评价报告。若理想理论无法按当前数据或计算条件实现，应公开修改理论边界或给出证明与限制，不得保持理论表述不变而用不同机制替代。
+
+> 真实推进、阻塞项、阶段结果与8月12日后的技术细节见《8.12之后推进》。
+
+### 当前正式训练切片边界（2026-08-22）
+
+当前可进入 CPU-only 验证的正式训练合同为 `aggregate_baseline`：物理边活动、聚合速率和聚合 RB 占用分别由直接运行时字段及独立 observation mask 定义。当前模型、loss 和 metrics 不消费逐 RB 输出；逐 RB 标签作为 `per_rb_target_sidecar` 保留用于诊断和后续 `per_rb_extension_v1`，不能把 aggregate baseline 的结果描述为逐 RB 方法。缺失字段保持 `None`/false mask 语义，不以零填充替代观测。该合同审计通过只解除 CPU baseline 门，不代表 GPU、最终方法或 locked-test 已批准。
+
+### CPU-to-GPU 放行状态（2026-08-23）
+
+三组独立、固定数据窗口的 aggregate-baseline CPU 复验已完成；预先冻结的放行条件包含 validation link-F1、calibration link-F1、运营误差、至少3个 seed，以及 node-x MAE 不超过 persistence 的 1.25 倍。活动 F1 与运营误差条件通过，但 validation node-x MAE ratio=`1.3647403366`，因此 `gpu_allowed=false`。该结果只证明 CPU 诊断证据，不能升级为 GPU 训练资格、逐 RB 方法或完整 PI-JWM 性能结论；`locked_test` 仍封存。
+
+### 数值 gate 更新（2026-08-23）
+
+在不变更数据合同的前提下，残差状态头采用显式 zero-init 与 `residual_state_scale=0.5`，三个固定数据窗口 seed 的 CPU gate 已通过：`gpu_allowed=true`，validation node-x MAE ratio=`1.1389760339`。这只表示数值条件满足；当前机器 CUDA 不可用，GPU 尚未启动，`locked_test` 仍封存。该配置必须按显式参数记录，不能把 aggregate baseline 写成逐 RB 方法或把 CPU gate 写成正式性能结论。
+
+远端 RTX 4090 已完成同配置非 locked GPU smoke：`gpu_execution=true`，train/validation/calibration=`2/1/1`，manifest 完整且 `locked_test_accessed=false`。这只解除 GPU 执行路径门；正式长训练、最终性能声明和逐 RB 方法仍未完成。
+
+随后已完成首个正式 GPU seed `20260824`：256/128/128 windows、3 epochs，checkpoint 与 manifest 验收通过，未访问 `locked_test`。该结果只证明首个非 locked GPU 训练闭环，不能替代多 seed 统计或最终方法结论。
+
+截至 2026-08-23，已按同一显式配置完成正式非 locked GPU seeds `20260824/20260825/20260826`。三枚均为 aggregate baseline 的 `coupled_dual_gnn_residual`，窗口预算为 `256/128/128`，并通过逐文件 manifest 验收（每枚18项、0 mismatch），`gpu_execution=true` 且 `locked_test_accessed=false`。三 seed validation link-F1 相对 persistence 增益均值为 `0.06478`（样本标准差 `0.01393`），calibration 增益均值为 `0.10731`（样本标准差 `0.02816`）。这些结果仅构成非 locked GPU 训练闭环和诊断证据；当前训练切片仍不消费逐 RB sidecar，`formal_performance_claim_ready=false`，不得据此宣称逐 RB 方法或最终 PI-JWM 性能已完成。
+
+GPU 多 seed 汇总审计已完成，报告位于 `code/artifacts/audit/pi_jwm_formal_gpu_multiseed_audit_20260823/`。审计逐目录重算三枚训练 manifest 并核对合同、样本数、阈值来源和安全边界，结果为三 seed 合同一致、manifest mismatch=0、未访问 `locked_test`。需要保留的负面证据是 validation node-x MAE 相对 persistence 的均值差值为 `+0.20792018`；因此当前只能报告 aggregate-baseline 的非 locked GPU 训练与活动/运营诊断，不能称为联合状态 rollout 已优于 persistence，也不能进入最终方法冻结。
+
+随后完成 `k=1/2/3` 的非 locked horizon rollout 诊断，报告位于 `code/artifacts/audit/pi_jwm_formal_gpu_rollout_multiseed_audit_20260823/`。三 seed 在 link activity、throughput 和 RB occupancy 误差上均有一致改善，但 node-x MAE 在三个 horizon 均高于 persistence，学习模型自身 node-x 误差由 `k=1` 到 `k=3` 平均放大约 `3.17x`。因此当前证据支持通信/资源预测诊断，不支持联合状态 rollout 已闭合；下一步应做受控输入扰动鲁棒性诊断，仍不访问 `locked_test`。
+
+### 非 locked 鲁棒性诊断边界（2026-08-23）
+
+鲁棒性脚本已修正为区分“检查点训练设备”和“本次评估设备”：报告同时记录 `evaluation_device` 与实际 `gpu_execution`。对三枚非 locked GPU 检查点进行的本地 CPU validation 扰动诊断已重跑，汇总 `evaluation_devices=["cpu"]`、`gpu_execution=false`、`locked_test_accessed=false`，因此不能称为 GPU 鲁棒性结果。noise=`0/0.05/0.10/0.20` 只作用于 presence 为真的归一化连续历史特征，mask、拓扑、动作、未来动作和 target 不变；node-x 与 task-delay 误差随噪声显著上升，结果仅作为输入敏感性诊断。下一步必须先冻结调参协议，再开展受控 GPU sweep；`formal_performance_claim_ready=false` 保持。
+
+调参协议现已冻结为受控 screening：`pooled_gru`、`independent_dual_gnn`、`coupled_dual_gnn`、`coupled_dual_gnn_residual` 四个模块，learning rate=`2e-4/3e-4`，seeds=`20260824/20260825/20260826`，其余训练预算、数据窗口、指标和选择 gate 全部固定，机器记录位于 `code/artifacts/audit/pi_jwm_formal_tuning_protocol_20260823/tuning_protocol_freeze.json`。远端 GPU 只读探测当前 `Connection refused`，因此 sweep 尚未执行；该协议冻结不等于方法冻结，也不开放 locked-test。
+
+受控 GPU screening 随后已完成。6 个远端 run 共覆盖24个候选，逐目录 manifest 均为0 mismatch，且所有 run 都是非 locked CUDA 训练。按事前 gate，唯一通过的组合为 `coupled_dual_gnn_residual + lr=3e-4`：三 seed validation link-F1 delta 均值 `+0.06478173`、calibration delta 均值 `+0.10730501`、validation node-x MAE ratio 均值 `1.13918`。该结果只是固定预算下的候选筛选，不构成最终方法冻结或最终性能声明；后续仍需 rollout、输入扰动/不确定性和理论—实现—数据—指标闭环复核。
+
+对该 screening candidate 的下游 CPU 审计已完成：`k=1/2/3` horizon 中通信/资源误差继续改善，但 node-x MAE delta 均值约 `+0.20979/+0.20824/+0.20574`，学习模型自身 node-x 误差增长约 `3.17x`；输入扰动 noise=`0.05/0.10/0.20` 时 node-x MAE delta 均值约 `+10.13/+20.97/+42.70`。这些证据说明当前候选仍是 aggregate-baseline 诊断模型，不是联合状态 rollout 已闭合的最终 PI-JWM 方法；下一步应在 CPU 上处理状态误差和输入敏感性根因，不因筛选过线而启动新的 GPU 或 locked-test。
+
+### 当前输入敏感性诊断的理论边界（2026-08-23）
+
+key-wise CPU 审计确认：`node_state` 扰动主要通过 residual state mean 的最后历史状态基座影响 node-x，`task_state` 扰动主要通过 task-history encoding 影响 task-delay；`physical_edge_state` 与 `flow_state` 在当前指标上未显示实质传播。该证据用于约束当前 aggregate-baseline 的实现与公开表述，不把敏感性诊断升级为最终鲁棒性结论，也不改变 PI-JWM 目标方法的定义。若后续要改变 residual anchoring 或 task-state encoding，必须同步修改理论、代码、训练协议、测试和指标映射后再重新审计。
+
+### 候选理论—实现一致性审计边界（2026-08-23）
+
+对 selected aggregate candidate 的机器审计确认 residual 配置、task-history/future-action conditioning 和 aggregate-baseline 口径与代码一致；但当前 world-model rollout 没有在每个 horizon step 调用确定性规则层更新动作写入、生命周期、资源守恒等规则字段。该差异记录为 `per_step_deterministic_rule_update_missing`，阻断后续训练和最终方法 claim。除非补齐规则层并完成逐项测试/产物映射，或同步收缩理论定义与公开措辞，否则不能把当前 latent transition + state heads 路径称为完整 PI-JWM 联合状态生成方法。
+
+规则层实现还受当前数据/模型边界阻断：归一化 statistics 没有进入 model batch，future action 没有显式 source endpoint，未来服务量/accepted outcome 未作为规则输入，且没有 deterministic target masks 区分规则输出与学习输出。补齐这些接口前，不得把任何代理量、最后历史状态或补零值称为确定性规则更新。
+
+### 2026-08-23 方法边界更新：规则层接口已实现，旧候选需重训
+
+上述四项接口阻断已在代码和 formal window contract 中闭合。当前实现采用“learned service heads 预测服务量，deterministic rule layer 在物理单位执行守恒/端点/DAG 更新，结果回到 normalized space 并反馈下一步”的明确边界。该实现通过 CPU TDD 与真实非 locked 窗口反向传播验证，但 2026-08-23 既有 GPU 候选 checkpoint 未启用该层，不能与新方法混用；须重训后再谈方法冻结或性能 claim。
+## 确定性规则层的当前实现边界（2026-08-23 v2）
+
+当前 aggregate-baseline 世界模型在每个 rollout step 使用以下严格分工：
+
+1. 学习模块预测物理边有效 rate，以及每条 flow 的有界服务比例；规则层将服务比例乘以该步可服务 remaining data，得到物理单位 delivered data。
+2. RB occupancy 由显式动作源/目标端点和 RB count 写入；端点只来自动作记录，禁止读取 label-time task state 推断。
+3. CPU 不属于策略动作。通信更新后，对 computing 任务按 `remaining_work / slot_seconds` 形成需求，并在节点 capacity 下执行 capped equal sharing；logged future CPU allocation 不被模型消费。
+4. flow remaining/cumulative、task transmitted/computed、deadline/delay、lifecycle 和 DAG release 按守恒与合法阶段递归更新；服务不得超过当前 remaining。
+5. 规则状态与学习状态的差只在相应 rule/service mask 上反馈到下一步 latent；未受规则控制的 node state 不做重复反馈或伪确定性覆盖。
+
+当前证据只支持“规则层启用的 aggregate candidate 已通过 non-locked CPU-to-GPU 门”。它不支持逐 RB 方法、locked-test 结果或正式性能声明。
+
+### 规则递推复放验证状态（2026-08-26）
+
+规则层启用 checkpoint 的 CPU replay 已在其实际训练使用的 v4 rule-contract tensor 上完成。输入 data flow 守恒先独立复算通过；随后 seeds `20260824/20260825/20260826` 各在 128 个 validation windows 上捕获到完整的 192/192 个规则递推步骤，flow、RB、CPU、lifecycle 与 DAG 不变量的 violation counts 均为空。新建 flow 的规则语义明确为：`delivered_cumulative` 和 age 从物理零开始，不能继承 padding 经反归一化得到的训练均值。证据位置为 `code/artifacts/audit/pi_jwm_formal_rule_v2_cpu_rule_rollout_multiseed_20260826_created_flow_fixed/`。
+
+该证据只闭合“每一步规则递推是否实际执行并满足已定义不变量”。当前候选仍是 non-locked aggregate baseline，per-RB sidecar 未被模型消费；它也不是 world-model candidate-rollout planner，因为尚未展示针对每个候选动作生成未来状态、任务、成本和风险轨迹并据此选择动作。因此不得据此宣称逐 RB 方法、闭环规划、locked-test 或最终性能结论。
+
+### Candidate-action rollout planner 审计状态（2026-08-26）
+
+对当前 formal world model 与历史 R6 策略路径完成了独立、code-only 机制审计。formal model 的已记录动作条件预测能力仍存在；但 R6 是对当前 belief/state 与候选描述符的 direct scoring，未引用该 world model。审计未找到合法候选序列生成、同一 belief 下逐候选 world-model rollout、候选相关未来 state/task/cost/risk 提取、按预测后果排序选择，或“只执行选中首动作后反馈重规划”的完整闭环。报告为 `code/artifacts/audit/pi_jwm_formal_candidate_rollout_planner_audit_20260826/candidate_rollout_planner_audit.json`，SHA-256 `7A71C78F78058F8F0C19EC0509816A2A31D972B27DA8CF1D8FABC8F7CC3B6637`。
+
+因此 P5 的真实状态是“独立审计完成、机制未实现”，而不是调参或训练不足。它阻止 planner GPU 实验、planner 方法冻结与 locked-test；不回写或否定既有 non-locked aggregate baseline 的规则层训练/replay 证据，也不授权任何最终性能声明。
+
+### Candidate-action rollout 机制原型边界（2026-08-26）
+
+已新增 `code/src/pi_jwm/formal_candidate_rollout_planner_v1.py` 作为 CPU-only 机制原型：对同一 `history/static` 为每个合法候选复制完整 `future_action`，逐候选调用正式 action-conditioned world model，由显式 extractor 提供 future state、task outcome、cost、risk，再按 objective 选择首动作并提供更新历史后的 `replan`。该原型通过 5/5 定向测试。
+
+原型状态固定为 `prototype_only`，不等于正式 PI-JWM planner。合法候选生成器、任务目标/风险定义和真实环境执行反馈适配尚未冻结；原有 code-only planner audit 仍为 `blocked`，因此不开放 planner GPU、方法冻结或 locked-test，也不形成 formal performance claim。
+
+### P3 方法适配与多源数据边界（2026-08-26）
+
+三个模块的场景适配理由、限制、预测/决策指标和多源数据使用边界统一记录在 `记录/设计/2026-08-26-P3方法理论适配与多源数据方案.md`，机器状态在 `记录/P3方法适配与多源数据方案_20260826.json`。该文件只固定理论和实验边界，不把尚未核验的真实数据或 planner 原型写成已完成能力。
+
+### P4 世界模型机制边界（2026-08-26）
+
+当前 P4 已完成机制层验收，但尚未完成正式精度层验收。冻结的 h20 tensor contract 为 `code/artifacts/formal_tensor/pi_jwm_v4_tensor_v4_rule_contract_h20_unlocked_20260826`（history=8、horizon=20、54 个 unlocked seed、14,742 个窗口）。CPU 1/5/20 horizon 审计和统一 P4 机制门分别记录在 `code/artifacts/audit/pi_jwm_formal_p4_horizon_mechanism_audit_20260826/p4_horizon_mechanism_audit.json` 与 `code/artifacts/audit/pi_jwm_p4_world_model_gate_h20_20260826/p4_world_model_gate.json`，两者均未访问 `locked_test`。
+
+机制门证明：规则递推实际执行、输出长度与 finite 性正确、动作注入会改变预测、target 不会泄漏到预测，且既有 non-locked aggregate artifact 边界一致。机制 probe 使用的可复用 checkpoint 训练 horizon=3；因此 h20 结果不是重训后的 20 步 state/task/resource/uncertainty 精度结果。正式精度门仍 pending，`formal_performance_claim_ready=false`；不得进入 P5 或把该结果写成最终方法性能。
+
+### P4 h20 正式精度审查结果（2026-08-27，覆盖上一段的 pending 状态）
+
+冻结合同下的 h20 三 seed 训练已经完成，seeds 为 `20260824/20260825/20260826`，每个 validation 有 128 个窗口；运行记录均为 `gpu_execution=true`、`locked_test_accessed=false`。审计入口为 `code/artifacts/audit/pi_jwm_p4_h20_precision_audit_20260826/p4_h20_precision_audit.json`，该文件只代表 non-locked aggregate-baseline 精度证据。
+
+20 步后，模型对节点 x 坐标的平均绝对误差为 `22.8591 m`，而最简单的 persistence 基线为 `22.1450 m`；三个 seed 均没有超过基线，平均多错 `0.7140 m`。同时模型标为“95% 把握”的 node-x 区间实际只覆盖 `75.43%` 的真实值，说明它给出的范围偏窄。task-delay 的 95% coverage 为 `96.93%`，但这不能抵消 node-x 的失败。
+
+因此 P4 的机制门已通过、正式精度门已测量但 `blocked`。`formal_performance_claim_ready=false` 保持；不得把本结果写成最终方法性能、不得进入后续 roadmap gate、不得以重跑同一 GPU 配置替代诊断。唯一下一步是 CPU-only 的单变量 node-x 长期误差原因诊断；在一个具体原因被证实前，不改模型、tensor contract、训练协议，也不访问 `locked_test`。
+
+### P4 节点类型契约诊断（2026-08-27，已证实的阻塞原因）
+
+P4 长期位置误差的首个具体原因已由代码和完整 h20 数据扫描共同证实。AirFogSim 源数据中节点类型不是缺失，而是使用 `V/U/I/C` 四个短码；collector 在写入正式 bundle 时保留短码，而 tensorizer 只接受 `vehicle/uav/rsu/edge_server/cloud`。结果是 h20 的全部 54 条 unlocked 轨迹、2,484 个静态节点均得到 `node_kind_index=-1`，其 290,076 个实际 present 的节点时刻没有一个有效类型。
+
+这会直接破坏理论--实现一致性：`coupled_dual_gnn_residual` 实现以 `node_kind_index >= 0` 定义物理节点有效性，并由此定义 attached agent 的有效性。h20 训练中的物理图边--节点消息、信息图 flow--agent 消息和 agent--node 跨图耦合因而为零；flow--physical-edge 耦合与 task--node 写入仍存在，不能作为前述三条通路的替代。故先前的三枚 h20 checkpoint 可以保留为可复现的 non-locked 历史结果，但绝非完整双图 PI-JWM 的精度证据。
+
+在修复前，P4 保持 `blocked`，`formal_performance_claim_ready=false`；不重跑相同 GPU 配置、不进入 P5/P6、不访问 `locked_test`。唯一许可的下一步是最小的数据入口修复：规范化 `V/U/I/C`，并增加“每个 present 节点必须有有效类型”的契约测试。之后仅重建受影响的 unlocked h20 tensor，完成 CPU 验收，才评估是否需要 GPU 重训。
+### P4 修复后 h20 CPU 验收边界（2026-08-27）
+
+修复后的 h20 数据合同已通过结构验证，并完成一次小规模 CPU 训练与 checkpoint 重载验收。定向测试结果为 RB 重建 11/11、tensor 构建 8/8、世界模型 8/8、CPU smoke 2/2；验收样本为 train/validation/calibration=8/4/4。该证据只说明修复后的节点类型和 RB 标签能够正确进入模型，输出为有限值，checkpoint 可以保存和读取；它不代表 h20 正式精度通过，也不打开 GPU 或 locked-test。当前仍保持 `formal_performance_claim_ready=false`，下一门是独立 CPU Go/No-Go 审查。
+
+### P4 修复后 CPU Go/No-Go 边界（2026-08-27）
+
+修复后的合同已经有 3 个独立 CPU seed，但独立放行门仍未通过。验证集 link-F1 相对 persistence 的三个差值为 `+0.0213`、`-0.4492`、`-0.0079`，平均差值为 `-0.1453`；因此通信活动预测在当前小规模 CPU 协议下不稳定。位置误差比例 `1.0071` 以及吞吐、RB 占用、任务时延指标没有构成阻塞。当前 `gpu_allowed=false`、`formal_performance_claim_ready=false`、`locked_test_accessed=false`。下一步仅做 CPU 通信活动 F1 原因诊断。
+
+### P4 physical-edge rule-feedback 输入路由边界（2026-08-30，当前覆盖）
+
+只读诊断和单变量干预已将失败 seed 的长步高分尾部闭合到 direct physical-edge rule-feedback 路径，但干预不支持永久关闭反馈。当前理论和实现统一为：物理边规则 correction 是下一步 edge transition 的外部输入消息，不是上一时刻 recurrent hidden 本身。实现因此保留原投影和参数，只把 projection 加入 edge GRU input，由 GRU 门控处理；node、flow、task feedback 语义不变。
+
+该修改已通过 TDD、相关回归、旧 checkpoint strict load 和 `2/1/1` CPU micro-smoke。它只能称为已通过接口门的 `physical-edge rule-feedback input routing fix` 候选，不是新模型、完整 RSSM 或最终方法。现有 CPU 数值不得解释为性能提升；P4 仍 blocked，`formal_performance_claim_ready=false`、`locked_test_accessed=false`。后续只允许在用户开启 GPU 后按冻结协议先跑 sentinel seed `20260831`。
+
+### P4 link 事件概率方案 B 的真实验收边界（2026-09-01，当前覆盖）
+
+方案 B 的实现定义保持为：先对 weighted-BCE raw logit 做 `z-log(pos_weight)` 解析反演，再只用 calibration split 拟合一个 scalar temperature；正式分类继续复用 legacy raw decision，概率指标使用变换后的事件概率。该实现已进入共享数学工具、formal metrics、formal runner 和独立 CPU audit 入口，并通过对应的 52 项定向回归。
+
+但冻结 seed `20260831` 的真实 CPU audit 没有通过预注册泛化门。运行在发布 artifact 前因 `validation nll regressed after temperature fitting` 停止，说明 calibration 拟合出的单温度在 validation 上使 NLL 相对 `T=1` 解析反演基线恶化。因此当前只能表述为“方案 B 实现链已建立，但真实概率校准验收失败”；不得写成概率语义门通过，更不得写成 P4 完成。
+
+当前状态固定为 `probability semantics gate = failed`、`sentinel performance gate = no_go`、`P4 = blocked`、`formal_performance_claim_ready=false`、`locked_test_accessed=false`。失败后没有发布新的 audit JSON 或 manifest，也未启动 GPU 或另外两个 seed。确认新的单变量方法边界前，不允许通过 validation 调参、换 calibrator、放宽门或重复运行。
+
+### P4 link低召回edge GRU旁路证据边界（2026-09-05，当前覆盖）
+
+冻结seed `20260831`的recall诊断确认低召回主要集中在持续活跃链路，但这只是错误位置，不是底层原因。经用户批准的唯一反事实核验仅在CPU推理时让`FormalDualGraphWorldModel.edge_transition`返回进入GRU前的hidden state；其他模型计算、checkpoint、数据、sample IDs、mask和raw threshold=`0.9`保持不变。
+
+该干预没有找回漏报：candidate TP/FP/FN从基线`1902/557/5855`变为`0/0/7757`，原始2,791个关键持续链路找回0个，机器判定为`not_sufficient_to_explain_dominant_low_recall`。因此不得再表述为“edge GRU更新已经被证明会擦除链路活跃记忆”；现有证据只表明GRU更新对该checkpoint产生任何越过冻结阈值的链路分数是必要的。
+
+本次旁路不是正式模型、不是消融性能，也没有证明CFE、rule feedback、link head或loss是原因。报告位于`code/artifacts/audit/pi_jwm_p4_edge_gru_bypass_intervention_20260904/`。P4继续blocked，`formal_performance_claim_ready=false`、`locked_test_accessed=false`；新的机制假设必须另立单变量设计并经用户确认。
+
+### 完整 RSSM 方法边界（2026-09-05）
+
+旧 `graph_rssm_v1` 仅作为 R4 历史候选：其 context prior/posterior 同源，缺少逐步观测 posterior、balanced KL 和完整多步 latent 监督，不能称为完整 RSSM。新增 `complete_graph_rssm_v1` 才是当前完整 RSSM 候选实现：确定性上下文 `h` 产生动作条件 prior，训练 posterior 额外接收对应观测；部署预测只使用历史上下文、动作和 prior。未来 target 及 mask 不进入预测路径。该候选保留双图、CIP/CEP/CFL、确定性规则层、显式状态头和现有 mask 语义，并在目标中记录逐步 balanced KL 与自由 prior rollout 一致性。它已通过真实 canonical train/validation/calibration 的 h1/h5/h20 CPU preflight、target 泄漏门和 strict checkpoint roundtrip，但仍没有真实性能或正式方法冻结证据；P4 仍 blocked。
+
+补充一致性审查确认：训练 posterior 还必须通过观测/状态重构目标获得直接梯度。`complete_graph_rssm_v1` 现已在训练模式生成 target-conditioned posterior teacher 的显式状态/分类输出；R4 重构目标保留自由 prior 重构，并增加权重 `0.5` 的 teacher 重构。正式 `predicted_*` 仍只代表 prior-only 部署输出，验证指标不读取 teacher。该修改只补齐 RSSM 训练闭环，不构成性能提升证据。
+
+正式 P4 路径中的对应候选为 `complete_rssm_dual_graph_v1` / `formal_complete_rssm_v1_1`。它以原正式物理--信息双图和确定性规则层作为 decoder 主体，增加动作条件 stochastic prior、目标观测条件 posterior teacher、逐步 balanced KL、自由 prior 重构、teacher 重构和多步 overshooting。部署/validation 只允许 prior 输出；训练 target 不得改变 prior 输出。RSSM latent 必须实际参与连续状态、presence、link activity、task lifecycle、DAG release、DAG edge presence及可选 energy 输出，不能由确定性分类头绕过。若启用 `zero_init_residual_state_heads`，RSSM 连续 correction heads 也必须零初始化；checkpoint 必须记录 `rssm_residual_head_initialization=zero_when_requested_v1`，否则拒绝正式复载。
+
+该方法已通过正式 CPU 一致性门，但冻结 GPU sentinel 仅达到部分指标改善：link、throughput、RB 和 task delay 保护项通过，node-x 聚合 ratio=`1.2877405` 超过 `1.25`，因此仍是未定版候选，不能表述为 P4 通过或性能优越。`locked_test_accessed=false`、`formal_performance_claim_ready=false`。
+
+针对上述 node-x 失败，CPU 只读分解确认 formal dual-graph base ratio=`1.15756`，加入 RSSM correction 后才升至 `1.28774`；因此后续候选被严格限定为 `complete_rssm_node_x_safe_dual_graph_v1`。它不改变网络、双图、prior/posterior、KL、overshooting 或部署路径，只在训练期增加 `node_x_residual_non_degradation_v1`：当 prior RSSM correction 使 node-x 绝对误差大于 detached base 时处罚差值，权重固定 `1.0`。base 在该项中 detached，故新项不能直接训练 base；posterior teacher reconstruction 不重复应用该约束。checkpoint 必须记录 `node_x_residual_loss_contract=node_x_residual_non_degradation_v1`，旧方法身份不得冒充该候选。
+
+该候选已通过 CPU 公式、mask、隔离梯度、target 泄漏、strict reload 和协议一致性审计，但尚无 GPU 性能结果。冻结 sentinel 继续使用 seed=`20260831`、data seed=`20260823`、`256/128/128`、8 epochs、hidden=32、h20 以及原性能阈值。当前仅为 `ready_when_gpu_available`；P4、其他 seed、概率门和 `locked_test` 仍关闭。
+
+后续冻结 GPU sentinel 已否定该候选：node-x ratio=`1.52058 > 1.25`，正式状态=`no_go`。只读分解表明非劣化项确实把 RSSM correction 平均幅度压至 `0.07621 m`，但从头联合训练后的 formal base ratio 已恶化到 `1.51660`；相同初始化排除了随机初始化解释。因此 `complete_rssm_node_x_safe_dual_graph_v1` 保留为失败候选，不得通过调权重、补 seed 或只报告其他通过指标继续推进。
+
+可以讨论但尚未实现的新边界是：复用旧 v3 checkpoint 中 ratio=`1.15756` 的 base 并冻结其参数，只训练 RSSM correction。该想法属于新的 `candidate method`，必须重新完成理论、checkpoint 来源、优化变量和 CPU 门定义后才能运行，当前不构成项目能力或性能证据。
+
+2026-09-06 文献与代码粒度复核进一步限定了上述正式方法的理论名称。`formal_complete_rssm_v1_1` 的 prior/posterior、KL、teacher、overshooting 和部署 prior-only 语义仍然完整；但其节点、边与任务表示先经过 masked pooling 形成单个 global context，stochastic decoder 随后把同一类 correction 广播给该样本内全部同类实体。因此当前可核验的方法边界是“formal dual-graph base 上的 global aggregate RSSM adapter”，不得称为逐节点、逐边或逐任务的 entity-aligned Graph-RSSM。特别是，单个 link correction 只能整体平移同一步所有边的 logit，不能改变边间排序。
+
+与 G-RSSM、R-SSM、Graph Dreamer 和图网络物理模拟的实体级状态做法对照后，可讨论的新候选是 `entity_aligned_dual_graph_rssm_v1`：保留物理节点、物理/信息边和任务各自的 deterministic/stochastic state，再复用现有双图与 CIP/CEP/CFL 传播。该候选是 `candidate method`，尚未实现、训练或验证；文献对照只证明当前 global broadcast 结构存在表达限制，不证明实体级候选能够通过 P4。进入实现前必须先用已有 v3 checkpoint 和固定 validation 样本完成 CPU-only 实体级可表达性审计；不得同时修改输入字段、loss、训练预算、阈值或 seed。
+
+### P4 edge GRU接口只读追踪证据边界（2026-09-05，当前覆盖）
+
+本追踪不替换任何模型输出，只复制`edge_transition`的输入消息、更新前hidden和更新后hidden，并使用checkpoint中同一个`link_activity_head`读取更新前后logit。正式hook命中`1280/1280`、已移除；post logit与正式输出逐元素误差为0，按PyTorch GRUCell方程重算hidden的误差为0。因此它是当前checkpoint的可核验接口证据，不是新模型或新性能实验。
+
+冻结阈值`0.9`下，5855个真实正样本漏报中，5559个在进入本步GRU前已低于阈值，296个由本步更新向下跨阈值。overall的两类比例为`94.94%/5.06%`，h1为`100%/0%`，h20为`98.67%/1.33%`，得到预注册判定`incoming_readout_below_threshold_dominant`。这排除“本步GRU更新主导向下压分”，但不能由此单独归因history encoder、消息输入、GRU门或link head；h2以后的更新前状态本就是上一步递推结果。
+
+`aggregate_link_activity`在数据中定义为`physical_edge_state`内`active_task_count>0`，且`active_task_count`已作为正式物理边特征进入8步历史编码。因此当前不允许将问题表述为“链路活动输入字段缺失”。可以作为`candidate method`讨论的是：是否应将上一步二值活动状态定义为显式持久性基准，只让模型学习action-conditioned状态变化。该候选尚未实现、未训练、未验证；必须先定义无target泄漏的h2+递推和与wighted-BCE/方案B一致的概率语义。
+
+追踪报告位于`code/artifacts/audit/pi_jwm_p4_edge_gru_interface_trace_20260905/`，报告SHA-256=`87b4fe4b17d06928a1a3583be45f0521b51aa90866d39ce43a95075d868027d9`。P4继续blocked，`formal_performance_claim_ready=false`、`locked_test_accessed=false`；用户确认候选设计前不改模型、不训练、不启动follow-up seeds、不进入P6。
+
+### 新定义 Dataset/Tensor 最小合同（2026-09-19）
+
+Step 3.1 已依据只读 `02数据集构建与模型输入.md` 冻结一条最小真实 model-ready sample：`H=2, L=2`，History 截止 anchor 前一帧，Future Action 与 Target 对齐于 anchor 起始的连续两帧。input-side entity index 只来自当前及历史可见对象；未来新对象使用独立 target-side index 表达，不进入 History 或 input index。presence、feature mask 和真实零值分离，四类 action 保持 Route/Comm/Comp/UAV Mobility 统一结构，车辆运动仍由 SUMO 外生推进。
+
+通信 service 继续表示 wireless/wired hop-level transport volume；task/data transmitted progress 与 service 分离，不能把多跳 service 相加解释为端到端 payload progress。Step 3.1 当时将 DAG 误判为无真实来源；该判断已由下方 Step 3.1R 修正。Static 保存实体/关系索引与结构，Metadata 保存轨迹、时间、split、合同和审计信息，默认不作为模型输入。正式 batch/split builder 尚未开始。
+
+### STEP 3.1R 合同修正（2026-09-19）
+
+审阅后最小时间合同修正为 `History=H_{t-H+1:t}`；anchor frame 2、`H=2/L=2` 时，History 为 `[1,2]`，Future Action/Target 为 `[2,3]`。input physical/task index 由当前 `O_t` 建立并固定贯穿 History，较早帧不存在对象必须保留 row，并用 presence false、feature mask false、padding/null 表示。
+
+真实 observer 已有 DAG source。Raw capture 只把两端当前可见的依赖边放入 Decision，将含未来端点的边留在 internal metadata；Dataset Static 不读取未来端点身份。target index 分为 physical/task/flow namespace，channel relation endpoints 映射到 stable physical index。Action reference 不可解析时明确阻断并标记需要研究者决定，不再静默生成 `-1`。
+
+### STEP 3.1F History 合同最终收尾（2026-09-19）
+
+History 现在明确保留 `O_{t-H+1:t}` 以及过去已执行的 `A_{t-H+1:t-1}` 和已知 `Y_{t-H+1:t-1}`。对 anchor=2、H=2 的样本，History 为 `O_1+A_1+Y_1+O_2`，当前 `A_2/Y_2` 仍不进入 History；Future Action/Target 仍从 2 开始。
+
+input physical/task index 由整个 History observation 的因果可观测并集建立，flow index 由过去 Outcome 的真实 transfer event 建立。过去离开、较晚进入和缺失 feature 都使用固定 index 与 presence/mask 表达；过去 flow、relation 和 DAG 使用同一套 History index。Future Action 仍按 anchor `O_t` 解析，未来不可见引用不会被 union index 静默放行。
+
+STEP 3.1F 的 future-reference 扫描是 observation-only：已扫描 4 个非 locked Raw artifact、共 18 个可构造窗口，当前 0 个 unresolved reference。该数据不代表正式 dataset 可用率，也不替研究者决定未来任务到达的表示方案。
+
+### STEP 3.1F-PATCH index namespace 与 provenance 修正（2026-09-19）
+
+Future Action 现在先执行 anchor-time visibility 检查，再使用统一的 History causal observable union index 返回 task/node/UAV 数值引用；机器字段为 `future_action_index_policy=anchor_visibility_then_history_union_input_index`。过去可见、anchor 时已离开的对象不会被重新编号。validator 已逐项核对 action object ID、numeric index 与 `static.input_entity_index`，并由 disappearing-object fixture 验收。machine contract 的 input policy 为 `history_causal_observable_object_union`。future-reference audit JSON 已重新生成并由 sample manifest 保存路径、SHA-256 和 observation-only provenance；结果仍不外推正式 Dataset。该 patch 不改变 Raw、Flow/DAG、双图、World Model、Loss、Planner 或训练边界。
+
+### P4 link activity持久性残差候选的CPU实现边界（2026-09-05，当前覆盖）
+
+经用户确认后，当前只新增`link_activity_persistence_residual_v1`：历史最后一帧活动先形成未加权事件状态`u0=(+20或-20)-log(pos_weight)`，现有link head每步只输出变化量`delta`，h2以后只递推模型自己的`u`，正式`link_activity_logits=u+log(pos_weight)`。未来target和target mask不进入forward，temperature仍只属于训练后的calibration流程。
+
+该候选挂接在原`coupled_dual_gnn_residual`和确定性规则层上，其他状态头、双图、edge GRU、消息、loss、阈值与方案B不变。新checkpoint必须同时匹配`link_activity_method=persistence_residual_v1`、`mode=coupled_dual_gnn`和`residual_state_prediction=true`；旧绝对logit head的checkpoint即使参数形状相同也不得续训或正式评价。
+
+fresh CPU回归`88/88`通过。canonical h20 tensor上的一次极小micro-smoke使用train/validation/calibration=`2/1/1`、1 epoch、hidden=4；物理边规则反馈路径实际调用19次，h1/h20输出有限，checkpoint strict reload无缺键/多键，manifest 19项零不一致。该结果仅证明实现、递推、保存和证据链可执行，不证明性能改善。P4仍blocked；GPU sentinel、另外两个seed和`locked_test`均未运行。
+
+### P4 当前方法边界：实体级双图 RSSM（2026-09-06，当前覆盖）
+
+当前 P4 候选方法为 `entity_aligned_dual_graph_rssm_v1`。它在既有物理图、信息图、DAG、跨图耦合和确定性规则递推之上，为每个物理节点、物理边、信息流和任务分别维护确定性状态与随机状态。训练期的目标观测只进入对应实体的 posterior teacher；验证和部署的预测只使用历史、已知动作与 prior。节点位置先使用由历史位置得到的匀速 proposal，再学习逐节点残差；链路由逐边 latent 解码，能够表达边间排序变化。
+
+该方法已完成真实 unlocked tensor 上的 CPU 方法一致性验证，证明接口、因果边界、梯度、mask、动作条件、规则反馈和 checkpoint 复载成立。它仍是 `candidate method`，尚无全量三 seed 性能证据，不得写成 P4 已通过或最终方法。`locked_test` 未 tensorize、未访问；正式性能声明保持关闭。
+
+GPU 执行证据已进一步确认该方法能在 RTX 4090 上按 deterministic base 预训练、冻结 base、训练 entity RSSM、保存并严格复载 checkpoint。显存探测冻结 batch 为 `8`，短样本 execution sentinel 已完成；这些只把方法从“CPU 一致性通过”推进到“CUDA 正式路径可执行”，不构成精度或泛化证据。首个正式 seed `20260831` 正在使用全部 unlocked 数据训练，另外两个 seed 只有在首 seed 全部数值门通过后才允许启动。P4、P6 和最终性能声明的边界不变。
+
+### 当前双图四类对象的实现边界（2026-09-07，当前覆盖）
+
+当前 h20 正式训练接口把物理设备作为物理节点，把设备间有向通信链路作为物理边。物理节点主状态为 `x/y/z/speed/acceleration/cpu/storage`，并向实体级运动 proposal 额外提供因果派生的 `vx/vy/vz/ax/ay/az`；物理边状态为 `distance/csi_mean/rate_sum/active_task_count/allocated_rb_count`。
+
+信息节点是通过 `agent_node_index` 一一附着到活动物理节点的 agent。当前没有独立 `information_node_state`，agent encoder 复用对应物理节点的七维历史状态形成确定性 agent latent。信息边是 agent 之间的任务输入流、结果回传流和具有显式 payload 的依赖数据流，在正式 tensor 中以 `flow_state` 表示，五项特征为 `total_data/remaining_data/delivered_cumulative/delivered_this_slot/age`；端点、类型、所属任务和逐时隙物理承载分别由独立索引或 mask 保存。
+
+模型分别在 node—physical-edge 和 agent—flow 上执行消息传播，再通过 agent—physical-node 附着和 flow—physical-edge 承载关系交换跨图消息；任务与 DAG 作为业务辅助对象参与传播和规则递推。实体级 RSSM 为 node、physical_edge、flow、task 设置 prior/posterior 随机状态，但 agent 只保留基础模型中的确定性中间 latent。故当前实现可以表述为物理图与流式信息图的耦合模型，不能表述为四类对象均具有独立观测字段和独立随机状态。`locked_test`继续未访问。
+
+### P4 实体级双图 RSSM 两个正式 seed 证据（2026-09-09，当前覆盖）
+
+`20260831` 与 `20260830` 均使用同一冻结数据合同、模型、两阶段训练协议、全量 unlocked 划分和 gate-aware checkpoint 选择，并分别通过独立单 seed 验收。第二个 seed `20260830` 的最佳 RSSM epoch 为 `40`，validation/calibration link-F1 相对 persistence 为 `+0.45710/+0.88509`，node-x 总体/h5/h10/h20 ratio 为 `0.75086/0.76033/0.74939/0.74960`，throughput/RB/task-delay ratio 为 `0.93831/0.47523/0.01175`。
+
+这证明当前方法已在两个固定 seed 上表现出一致的正向结果，但仍不能称为 P4 已通过或最终方法：预注册的第三 seed `20260832` 和三 seed独立审计尚未完成。当前按用户要求暂停；`locked_test_accessed=false`、`formal_performance_claim_ready=false`，P6不开放。
+
+### 新定义 Raw Trajectory 因果边界（2026-09-19）
+
+Step 2.4 将通信 Outcome 的真实语义最终固定为三层字段：无线服务量 `wireless_delivered_data_by_task`、有线服务量 `wired_delivered_data_by_task`，以及只有两部分均真实可观测时才按任务求和得到的 `delivered_data_by_task`。有线服务量直接来自 AirFogSim `WiredNetworkManager.step(simulation_interval)` 的返回结果，并与任务 transmitted progress 和 lifecycle 对齐。当前 slot 已观测但无服务使用空 map `{}` 与 observed mask；接口不可恢复使用 `null`、missing mask 和原因，不能把两者混为零服务。该通信分层属于 Raw Trajectory Layer，尚未进入 Dataset/Tensor 或模型。
+
+新定义的 Raw 层只把 `arrival_time_s <= decision_time_s` 的任务放入当前 `O_t`、History 和 input-side Entity Index。AirFogSim `_to_generate_task_infos` 中更晚到达的 schedule 可以作为 raw/internal metadata 保留，但不得成为当前模型输入。物理加速度分成两种：AirFogSim 报告值保留为 `raw_simulator_acceleration_mps2` 审计字段；PI-JWM canonical physical acceleration 固定为只使用当前与历史速度的 `(v_t-v_{t-1})/delta_t`。首个有效时刻或实体缺少历史速度时，canonical 值为 `null` 且 mask 为 false，禁止伪造 0。该边界已由 Step 2.3 真实轨迹验证；Dataset/Tensor 如何承载它尚未开始。
+# 2026-09-19 STEP 3.2 工程边界
+
+STEP 3.2 只验证 Raw 到 model-ready batch 的流水线：先按 trajectory 切分，再在各 split 内构造冻结的 H=2/L=2 causal window，连续字段统计只来自 train 且遵守 presence/feature mask。当前产物为 non-locked observation-only validation bundle，不改变 Raw、双图、World Model、Loss、Planner 或训练定义。
+
+STEP 3.2-PATCH 已将 Dataset isolation 证据补齐：provenance 从 Raw 读取 trajectory/seed/source SHA/config lineage、frame/time range、slot duration 和 3.1F contract；真实 time-grid 与 step start/end 在 window construction 前验证；development trajectories 的 future-reference audit 独立保存为 observation-only JSON，当前 12/12/0/0；normalization 单位明确为 `m/s`、`m/s^2`、`AirFogSim data-unit`。该 Patch 不决定正式 split 比例，不改变 Raw 或 3.1F 语义。
+### Causal Flow Ledger 与 Raw additive Flow state（2026-09-20）
+
+研究者冻结 Flow 为 logical end-to-end business Flow，Hop 为 carrying segment；FlowID 使用 `(TaskID, FlowType, Epoch)`。PI-JWM 不修改 AirFogSim 核心传输状态机，而以真实 state/event 和历史 Ledger 因果维护 Input/Return 的 E2E delivered/remaining、current holder、RouteRevision 与 Epoch lineage。same-destination reroute 不换 Epoch；destination change 只允许 clean hop boundary 并创建新 Epoch。DepData vocabulary 保留但当前 runtime instances=0，DAG 不生成假 Flow。STEP 4.2C-B 已实现 Ledger/Raw amendment，STEP 4.2C-C 已将其 additive 贯穿 Sample/Tensor；Graph Builder 尚未开始。
+
+STEP 4.2C-B-PATCH 进一步冻结 endpoint provenance：Raw `target_node_id` 只表示当前 action/carrying-hop target，不能直接作为 end-to-end destination。Input 的 logical destination 来自动作成立后的 offload route terminal；Return 来自独立 `return_destination_id`。同一 `(TaskID, FlowType, Epoch)` destination 固定，普通 hop advancement 只推进 hop index，不增加 RouteRevision/Epoch。真实两跳 Input 已按单 FlowID/Epoch 和 final-hop-only E2E 通过机器验收；Return multi-hop 与 same-destination partial-hop reroute 尚无真实 runtime evidence。
+
+STEP 4.2C-C 进一步冻结 Sample/Tensor additive boundary：History Flow index 是因果 union，target Flow 使用独立 namespace；completed/superseded known row 不被压成 padding；Input/Return 类别与 provenance 来自 Raw；DepData 仍为 vocabulary-only。机器 artifact 位于 `code/artifacts/protocols/pi_jwm_step4_2c_c_flow_sample_tensor_v1_20260920/`，receipt `passed=true`。本 Step 不形成正式 Dataset，不进入 Graph Builder；唯一后续建议由研究者另行授权 Definition 03 Graph Builder Contract。
+
+STEP 4.2C-C-PATCH 进一步冻结 Sample/Tensor 的语义完整性边界：五个连续字段的统计只允许 `known=true AND presence=true AND feature_mask=true AND value!=null AND split=dev_train`，stats 的 mask policy 与 Step 3.2 精确一致；History Logical、History Carrying、target Logical、target Carrying 四组字段、mask、route 和 ID/provenance 均须通过独立 semantic equality。target carrying 使用独立 namespace，含 holder/hop/route/raw/normalized/mask，语义是 future ground-truth/deterministic-transition state，不是 learned prediction head。validator/receipt 顶层 `passed` 实际 AND 所有子检查、target namespace/Epoch isolation、placeholder/bounds/route mask、normalization、round-trip、deterministic rebuild 与 scope；该 Patch 仍不形成正式 Dataset、不进入 Graph Builder、模型或训练。
+# 2026-09-20 STEP 4.3A Typed Dual-Graph Builder 补充
+
+冻结 Tensor 的最后一个 History 时刻现已可确定性生成严格分离的 Physical / Information typed graph objects：Physical 只含空间位置、运动与空间关系；Information 由 Agent、Task、Comm、Task-Agent、logical Flow、DAG 组成；Carrying 是 Flow side state。跨图只 materialize 同实体 Align 和 wireless Comm endpoint 的 GeoComm dependency。当前 topology 参数仅用于 development validation，并未冻结为 PI-JWM 最终科研选择。历史边界：在 STEP 4.3A 完成时 Graph Encoder、World Model、Loss、Planner 与训练均未开始；随后 Encoder 已由 STEP 4.3B 完成。
+
+# 2026-09-20 STEP 4.3B Dual-Graph Encoder 补充
+
+定义 03 的工程实现已从 typed graph builder 延伸到 aligned encoder representation：完整 History 只对 Physical/Agent/Task/Flow 做对象级、presence-gated 时间编码；当前 typed graph 只做同一决策时刻的有向 representation refinement。P2A 仅沿 Align 从 Physical 到 Agent，P2C 仅沿 valid wireless GeoComm 注入 Comm relation；不存在 Information→Physical 或 Task/Flow 与 Physical 的 shortcut。Logical Flow 与 Carrying 分别编码、融合后只保留一个 Flow relation latent。正式输出为 `Z_t^{PI,L_g}`，不等于 `xi_t^Lat`，也不构成 World Model dynamics。当前配置与 artifact 仅用于未训练 CPU development acceptance，未形成性能结论。
+# 2026-09-21 Definition 04 通信服务边界核验
+
+审计阶段证明：AirFogSim nominal wireless rate 可由 CSI、RB 分配、功率、干扰、噪声和 RB bandwidth 按规则恢复；actual rate 还受到独立随机 outage realization 的置零影响。该 realization 在当前因果边界下只属于执行后 Outcome，不属于 Decision input。因此当时不能把 nominal rate 称为 actual service，也不能擅自增加 learned rate head；该阶段的暂时 stop 已由后续研究者决策关闭。Flow/Task 规则递推边界不变。
+
+研究者随后明确选择独立 known stochastic service event：Communication z 只表示未来 CSI/channel condition，outage 由已知 Rayleigh conditional mechanism在 rollout 中用显式 generator 抽样，或在 development expectation mode 中使用 `(1-p_out)R_nominal` 并标记 approximation；不建立 outage/rate/service residual head。STEP 4.4 已据此实现五类 aligned deterministic h、Vehicle/Comm stochastic z、prior/posterior、四类局部 Action routing、规则 transition、预测态动态图和递归 prior rollout。该冻结只证明未训练机制，不证明预测、校准、规划或性能；Definition 05 Loss/Training 仍未开始。
+
+STEP 4.4-PATCH2 的 Return 边界保持 fixed current object support：当前 History/input namespace 已存在的 Return Flow 仅按 `(task_index, flow_type_index=Return)` 绑定并递推，Input Flow 或其他 Task 的 Return 不可替代。World Model v1 不从 Future Target/真实未来 route 创建 future-only Return slot，机器合同固定 `future_return_birth_supported=false`。若明确需要 Return 但 current support 缺失，计算完成不等于最终完成，模型保持冻结 lifecycle 非终态并输出 `return_birth_required`、`final_completion_blocked_by_fixed_support`；Definition 05 必须对跨越该边界的监督 window 做 mask、exclude 或显式分类，不得当作普通 prediction error。
+
+STEP 4.4-PATCH3 进一步核实：冻结 current-side Tensor/Graph 没有 `Task.return_size`，所以无 Return slot 不能证明 Task 不需要 Return。真实 adapter 现在用 `task_return_requirement_known=false` 保留“不知道”，并在 computation finished 时输出 `final_completion_unresolved_by_return_requirement=true` 与 fixed-support blocking，绝不错误 final-complete；它与 `known=true/requires=true/no-slot` 的 `return_birth_required=true` 明确区分。DAG release 只计算有效 incoming edge，所有有效 predecessor 完成后才 release；terminal logical Flow 才同步 `remaining=0/presence=false/carrying=false/status=COMPLETED`。focused 30/30、正式 receipt 92/92 与 6 文件独立重建 equality 已通过，STEP 4.4 正式 COMPLETE / FROZEN。
+
+# 2026-09-21 STEP 5.1B Definition 05 Loss / Posterior / Metric 边界
+
+STEP 5.1B 已实现 Definition 05 的 additive CPU primitives。Future Motion/CSI target 只能进入 training-only posterior target encoder；prior predictor 不接收 target。当前实现包含 family-wise mask-normalized MSE、冻结统计量 raw→normalized loss bridge、diagonal Gaussian KL（raw/adjusted free-bits/count）、`L_Val` 和逐 horizon Motion/CSI MAE/RMSE。它们是接口与可执行性证据，不是训练循环、GPU、正式 Dataset、locked-test 或性能结果。Event/outage/rate/service residual、Flow/Task/DAG/lifecycle loss、NLL、overshooting、KL balancing 均未加入。
+# 2026-09-22 Definition 05 implementation boundary correction
+
+原 5.1B primitive implementation 不足以作为 Definition 05 完成证据：其 target encoder 聚合 horizon，receipt 使用 zero h/identity prediction，prior/decoder 未接入真实 STEP 4.4，KL/metric/gradient checks 不足。当前只执行 5.1B-PATCH，采用逐 horizon target evidence、family-specific future teacher、真实 STEP 4.4 prior/decoder、逐维 free bits 和 raw-unit metrics；未完成前不得进入 STEP 5.2。
+# 2026-09-23 当前实施边界（STEP 5.5）
+
+Formal Dataset v1 已按研究者冻结协议构建并通过机器验收：H=2、L=4、60 条真实 trajectory、48/12 trajectory-level split、每条 96 transitions、`radius_knn(1000m,k=2)`，四类动作来自真实 causal behavior-policy setter/scheduler 路径。该结论只证明数据与 CPU 训练接口已就绪，不是正式训练、预测性能、拓扑最优性或 Planner 结论；GPU、formal training、baseline、locked test 均未执行。
+## 2026-09-28 Planner Objective v1 研究者修订边界
+
+目标仍为 `(N_DDL,A_DDL,J_Delay,J_Burden,J_Effort)` 字典序最小化。`J_Effort` 仅聚合 anchor 适用的 Comm/Comp/Mob 归一化项，不含 RouteRevision 独立处罚；Priority 权重为 1，不作为 readiness 前提。最终业务主吞吐为真实 terminal-hop E2E useful bytes / 真实仿真时间，all-hop network service throughput 仅为诊断。允许 Planner-only 因果 side-state 携带当前已知 deadline、Return 目的地和 Route 控制结构，不进入训练模型。当前 4.2C-C/4.4 路线语义冲突仍阻塞多跳 `B_Tx` 和 STEP 6.2B；上述目标修订不是 scorer 已实现声明。证据见 STEP 6.2A-PATCH 实施记录。
+
+## 2026-09-28 STEP 6.2B 工程观察与验收边界
+
+冻结五项目标和严格字典序已经接入已有候选 rollout，单个 non-locked Formal Validation anchor 的 CPU checkpoint 机制通过；这不是候选性能结论。Comm effort 的旧分母把 242 条通信关系行当成 RB support，本 Step 按 AirFogSim 全局 RB 编号和当前有效无线关系改为 50 个 RB ID，并单独保存纠正 receipt。有效动作审计发现 pending/no-current-Flow Route 被现有 gate 接受但正式 adapter 映射 `flow_index=-1`、确定性规则不创建 Flow；同路径 existing-Flow Route 在 holder 未移动前修改 Task-Agent Host。上述冲突尚无研究者裁决，故 `STEP_6_2B=BLOCKED_ON_OBJECTIVE_SEMANTICS`，不宣称完整 Objective 验收。当前研究者冻结的 Objective、single-hop Route 研究边界、no-retrain checkpoint 决定均未改。证据见 STEP 6.2B 实施记录与机器 receipts；唯一下一动作是研究者决定 pending Route 支持处理和 same-path Host 语义。

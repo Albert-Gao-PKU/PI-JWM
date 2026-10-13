@@ -1,0 +1,92 @@
+# Python caches, environments, and build outputs
+.env
+.env.*
+*.pem
+*.key
+credentials*.json
+.netrc
+id_rsa
+id_rsa.*
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+
+# Local agent state and linked worktrees
+.agents/
+.codex/
+.superpowers/
+.worktrees/
+.codex_askpass_*.cmd
+tencent-doc-readonly.png
+
+# Runtime and local scratch files
+.tmp/
+tmp/
+*.pid
+*.log
+
+# LaTeX intermediate files
+*.aux
+*.out
+*.synctex*
+*.toc
+*.fls
+*.fdb_latexmk
+
+# Office temporary files
+~$*.docx
+~$*.pptx
+~$*.xlsx
+
+# Generated research outputs stay local; only governance metadata is versioned.
+code/artifacts/*
+!code/artifacts/README.md
+!code/artifacts/manifests/
+!code/artifacts/manifests/**
+
+# AirFogSim is an independent third-party checkout.
+code/reference/AirFogSim/
+
+# Large local research attachments and generated presentation outputs.
+literature/
+meeting/
+paper/papers/
+paper/ton_template_extract/
+记录/研究进展/*.pdf
+记录/研究进展/*.zip
+docs/templates/IEEEtran.cls
+
+# Independent repository: external data and model weights stay off Git.
+data/
+datasets/
+weights/
+checkpoints/
+environment/
+training_bundle_incoming/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.npz
+*.npy
+*.pkl
+*.pickle
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.download
+*.partial
+*.sqlite
+*.db
+*credentials*.json
+*cookies*.json

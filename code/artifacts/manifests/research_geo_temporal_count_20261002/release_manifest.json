@@ -1,0 +1,23 @@
+{
+  "schema_version": "PI-JWM-Local-Research-Training-Readiness-Release-v1",
+  "branch": "experiment/geo-temporal-count-20261002",
+  "baseline_source_commit": "f95bf2e5b9430666f325af3e6d6846d68b97e6e8",
+  "dataset_manifest_sha256": "6392a08b31340812463be9e3f5f78891d39933c54d50c71cca1984b3bf9448bc",
+  "readiness_receipt": "code/artifacts/manifests/research_geo_temporal_count_20261002/readiness.json",
+  "verification_receipt": "code/artifacts/manifests/research_geo_temporal_count_20261002/final_verification.json",
+  "training_readiness_passed": true,
+  "focused_tests_passed": 70,
+  "formal_training_started": false,
+  "full_validation_performed": false,
+  "locked_test_accessed": false,
+  "performance_improvement_claim": false,
+  "upstream_pushed": false,
+  "code_archive": "code/artifacts/research/geo_temporal_count_20261002/research_code_bundle.tar.gz",
+  "code_archive_sha256": "43a80fe4016de2b394bf6448bc1f4c9134f7340df0e24912de1f85c6869a4a21",
+  "code_archive_contains_dataset_or_virtualenv": false,
+  "documentation": "docs/research/geo_temporal_count_20261002.md",
+  "historical_gaps": [
+    "Step5.2 unified_flow_tensor.npz test fixture is absent; full repository regression is not claimed",
+    "knowledge index rebuild blocked by historical P4-EARSSM-SEED-20260831 config.json; old generated index retained"
+  ]
+}

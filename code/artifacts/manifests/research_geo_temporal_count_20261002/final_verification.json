@@ -1,0 +1,55 @@
+{
+  "scope": "focused_not_whole_repository",
+  "suites": [
+    {
+      "pattern": "test_research_geo_temporal_count_v1.py",
+      "tests_run": 13,
+      "passed": true,
+      "failures": [],
+      "errors": []
+    },
+    {
+      "pattern": "test_research_training_entry_v1.py",
+      "tests_run": 3,
+      "passed": true,
+      "failures": [],
+      "errors": []
+    },
+    {
+      "pattern": "test_step4_3b_dual_graph_encoder_v1.py",
+      "tests_run": 21,
+      "passed": true,
+      "failures": [],
+      "errors": []
+    },
+    {
+      "pattern": "test_step4_4_structured_rssm_world_model_v1.py",
+      "tests_run": 30,
+      "passed": true,
+      "failures": [],
+      "errors": []
+    },
+    {
+      "pattern": "test_step5_6b_formal_runner_v1.py",
+      "tests_run": 3,
+      "passed": true,
+      "failures": [],
+      "errors": []
+    }
+  ],
+  "tests_run": 70,
+  "passed": true,
+  "historical_suite_gap": "Step5.2 tests cannot initialize: historical unified_flow_tensor.npz is absent; not counted as passing",
+  "action_sensitivity": {
+    "passed": true,
+    "current_state_source": "real TRAIN window",
+    "sample_id": "formal-v1-sim-2026092307-policy-2026092407::anchor-0022",
+    "checkpoint_reconstructed_from_fresh_factory": true,
+    "uav_count": 2,
+    "position_action_sensitive": true,
+    "recurrent_state_action_sensitive": true,
+    "outputs_finite": true,
+    "future_target_used": false,
+    "planner_or_performance_claim": false
+  }
+}

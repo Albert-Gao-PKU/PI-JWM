@@ -1,0 +1,132 @@
+# 当前代码架构与新定义差异
+
+## 2026-09-29 STEP 6.3C CandidateDomain / rollout boundary
+
+`step6_3c_candidate_domain_v1.py` is the only search-independent candidate-domain entry. It derives current eligibility, TRAIN-observed joint structures and concrete causal bindings lazily; it never materializes the full domain. `step6_3c_search_protocol_v1.py` supplies the shared prefix node and one-transition `B_WM` accounting/cache. Interleaved search rebuilds the domain after every frozen-model transition. Empty H1 is `NO_FORMAL_CANDIDATE`; later empty branches are `GRAMMAR_DEAD_END`; no fallback or horizon backoff is introduced.
+
+## 2026-09-29 STEP 6.3B Candidate Grammar boundary
+
+The Planner v1 candidate layer now has a search-independent structured grammar and Formal TRAIN support admission before the existing candidate adapter, trained World Model rollout and objective scorer. It binds Comm/Comp/Mob from each current or predicted state; Route stays explicit no-op. No optimizer, new World Model parameter or candidate ranking path was added.
+
+## 2026-09-28 STEP 6.2B-PATCH Planner v1 Route 边界
+
+Planner v1 的 6.0C 准入层只接受空 Route family；Route schema、11 tensor adapter、4.4 learned Route encoder 和多跳确定性规则都保留。合法候选实际变化来自 Comm/Comp/Mob。此策略是研究者对当前 learned-support 的限制，不是删除 Route 架构。STEP 6.2B scorer/字典序比较器通过 CPU 合同验收；候选生成方法和闭环仍未建立。下文 6.2B 阻塞段是 Patch 前历史状态。
+
+## 2026-09-28 STEP 6.2B scorer 层（历史验收阻塞）
+
+`CandidateRolloutTrace + PlannerObjectiveCausalSideState + CandidateActionSequence + anchor state → CandidateObjectiveScore` 是独立 CPU scorer 层，不进入 Encoder/RSSM learned tensors；先求共用 `H_eff`，再逐 Task/Horizon 汇总五项目标，最后严格字典序。当前只证明 fixed-support 机制。pending Route admission 与 same-path Host 规则冲突使 6.2B 完整验收阻塞；不改变原模型结构、训练 checkpoint 或 Planner v1 single-hop 决定。
+
+## 2026-09-28 STEP 6.2A-CLOSURE Route boundary
+
+4.4 repaired multi-hop deterministic rule and rule-side route metadata remain code capabilities. Planner v1 admission applies the separate `FORMAL_DATASET_SINGLE_HOP_SUPPORT_V1` domain: one direct destination node per Route action. The domain gate does not alter the 11 learned action tensors or remove the multi-hop rule.
+
+## STEP 6.1 冻结模型候选推演层
+
+`step6_1_trained_candidate_rollout_v1.py` 在 6.0A/C Candidate/Domain 与冻结 5.6C Encoder/RSSM 之间建立 CPU 推演层：每个 anchor 只算一次当前 Encoder/posterior，候选克隆同一 state/graph/latent，每步在预测 state 上经本模块的 `compile_candidate_step` 调用未改的正式 `build_action`，再调用 4.4 `one_step` 递归更新 state/graph/latent。无目标函数、候选选择、闭环执行；历史 `formal_candidate_rollout_planner_v1.py` 不在当前路径。
+
+## STEP 6.0C Planner v1 动作域层
+
+6.0A 通用 Candidate 合同 → 6.0C 当前 Raw CPU 容量/UAV heading-elevation 控制侧状态 → 静态预算与六档 Mobility 验证 → 原 `build_action` 11 tensor 编译。6.0C 只更新 control-command side-state，不做物理状态或 World Model rollout。静态预算是研究者 Planner 操作规则，不是 AirFogSim 原生动态可用量。形式见 `docs/contracts/PIJWM_STEP_06_0C_PLANNER_ACTION_DOMAIN_V1.md`。
+
+## STEP 6.0B 约束来源边界
+
+Simulator Fact：AirFogSim CPU callback 直接给每个 Task 分配率，`Task.compute` 按率×时隙执行，无原生节点总量裁剪；静态 `FogProfile.cpu` 不等于动态可用 CPU。UAV setter/更新无数值硬边界。Implementation Fact：6.0A 的两项 UNKNOWN 保持，未改候选、World Model 或训练架构；世界模型的位置公式与仿真器一致，加速度使用已标注的 PI-JWM canonical 符号，与 simulator raw 符号相反。
+
+## STEP 6.0A 静态候选生成层（2026-09-26）
+
+当前因果支持与约束 → 四动作高层 CandidateActionStep → 长度 1–4 的 CandidateActionSequence → Search/Learned/Hybrid 接口 → 去重 CandidatePool → 包装正式训练 `build_action` 的张量编译器。到此为止。没有候选 World Model rollout、评价、选择或执行；旧 P6 `formal_candidate_rollout_planner_v1.py` 使用过期 `task_action*`，仅是历史原型。见新合同及 STEP 6.0A 实施记录。
+
+> 下列 1–5 节描述被 Step 1 审计的现有旧协议实现，不表示它符合 2026-09-18 的新 `00–06` 目标。总体差异见 `docs/PIJWM_IMPLEMENTATION_TRACKER.md` 和 `docs/implementation_records/STEP_01_AUDIT.md`。
+
+## 总体结构
+
+```text
+历史实体状态 + 静态拓扑 + 未来动作
+→ FormalDualGraphWorldModel（确定性双图底座）
+→ node / physical_edge / flow / task 的实体级 h,z
+→ prior 逐步 rollout（验证与部署）
+→ 多任务预测头 + 可选确定性规则递推
+→ 20 步联合状态与事件预测
+```
+
+Source of truth：以下实现事实来自所列源码与冻结协议；运行采用情况还需核对具体实验 `config.json` 和 checkpoint manifest。
+
+## 1. 确定性双图底座
+
+- 文件：`code/src/pi_jwm/formal_dual_graph_world_model_v1.py`
+- 配置：`FormalWorldModelConfig`
+- 模型：`FormalDualGraphWorldModel`
+- 主入口：`FormalDualGraphWorldModel.forward()`
+- latent 追踪：`FormalDualGraphWorldModel.forward_with_latent_trace()`
+- 实体状态宽度：node=7、physical_edge=5、flow=5、task=8，定义于 `COMPONENT_FEATURES`。
+- 图操作：`code/src/pi_jwm/formal_graph_ops_v1.py`，包含物理图、信息图、DAG 与跨图耦合。
+- 规则层：`code/src/pi_jwm/formal_deterministic_rule_layer_v1.py::DeterministicRuleLayer.forward()`。
+
+## 2. 实体对齐 RSSM
+
+- 文件：`code/src/pi_jwm/formal_entity_aligned_rssm_world_model_v1.py`
+- 配置：`FormalEntityAlignedRSSMConfig`
+- 模型：`FormalEntityAlignedRSSMWorldModel`
+- 主入口：`FormalEntityAlignedRSSMWorldModel.forward()`
+- 当前冻结维度：hidden=32、stochastic=16、history=8、horizon=20、overshooting distance=5。
+- entity latent：node、physical_edge、flow、task 各有独立确定性状态 `h` 和随机状态 `z`；agent 是双图底座中的确定性中间 latent，没有独立随机状态。
+- `priors` 只依赖已知历史、动作和递推状态；`posteriors` 在训练期结合目标观测。
+- prior 与 teacher 各有状态、存在性、DAG、链路、生命周期和能耗输出头。
+- 验证/部署路径固定为 prior-only；训练固定使用 posterior teacher。
+
+## 3. 确定性规则层
+
+`DeterministicRuleLayer` 在物理单位中处理动作端点、RB、flow 守恒、任务阶段、CPU 服务、DAG release 等确定性更新，再返回归一化空间反馈下一步。它不应被描述为学习模型自动发现的规律。
+
+## 4. Loss
+
+- 文件：`code/src/pi_jwm/formal_world_model_loss_v1.py`
+- 入口：`formal_world_model_loss()`
+- 配置结构：`FormalLossWeights`
+- 组成：masked Gaussian NLL/MAE、presence 与稀疏事件 BCE、生命周期、DAG、吞吐量/RB/时延等任务项，以及 RSSM KL、teacher reconstruction 和 overshooting。
+- 正式权重以冻结协议为准：KL=0.1、teacher reconstruction=0.5、overshooting=0.1、KL balance=0.8。
+
+## 5. 训练结构
+
+- 正式包装入口：`code/scripts/run_formal_p4_entity_rssm_gpu_v1.py::main()`。
+- 通用训练器：`code/scripts/run_formal_dual_graph_gpu_train_v1.py::run_gpu_training()` / `run_formal_training()`。
+- 两阶段：deterministic base 训练 20 epochs；随后冻结 base，训练 RSSM 最多 40 epochs。
+- checkpoint：逐 epoch 保存，使用 `p4_gate_aware_v1` 字典序选择；RSSM 最少 20 epochs，patience=10。
+- 正式配置事实：`code/artifacts/protocol/pi_jwm_p4_entity_rssm_frozen_protocol_20260906_v2/protocol.json`。
+
+## 6. 新定义下的实现状态
+
+- STEP 4.1 已冻结目标 mapping：Physical 只包含实体空间/运动与空间关系；Information Nodes 为 Agent/Task，Relations 为 Comm、Src/Host/Exec/Ret、Flow、DAG。
+- 现有 `physical_edge` 混合空间、CSI、rate、任务数和 RB，不符合目标严格双图划分，禁止按原语义继续使用。
+- STEP 4.2C-C（含 PATCH）已冻结 Flow Sample/Tensor additive extension：C-B Raw logical Flow/Carrying rows 进入独立 `logical_flow` History-union/target namespace；Flow 与 carrying 分离，History/target Logical/Carrying 四组语义逐字段核对；target carrying 明确是 future ground-truth/deterministic-transition state，不是 learned prediction head。该层在其完成时仍不是 Graph Builder；后续 STEP 4.3A 已完成 current typed graph materialization。
+- STEP 4.3A 已冻结 current typed dual-graph representation：Physical nodes/relations 与 Agent/Task/Comm/Task-Agent/Flow/DAG 严格分离，Carrying 保持 side state，Align/GeoComm 仅为 structural cross-domain references。builder 不包含编码、传播、聚合或 latent。
+- STEP 4.3B 已冻结 Definition 03 encoder：完整 History 对 Physical/Agent/Task/Flow 做独立 presence-gated GRU，current graph 做五类独立有向 relation update、分族 masked mean、独立 node update、P2A Align 与 wireless-only P2C GeoComm。Logical/Carrying 独立编码后融合为唯一 Flow relation latent；输出只到 aligned `Z_t^{PI,L_g}`，不是 `xi_t^Lat` 或 dynamics。
+- 独立 Agent/Communication/Task-Agent/current stateful Flow graph 尚未实现；四类动作 tensor 已冻结但尚未接入新图或模型。
+- 旧 entity RSSM 对 node/physical_edge/flow/task 均维护随机状态，与新定义的未知动态边界不同。
+- base 的逐步规则和 RSSM 修正尚未组成“预测→规则→重构图→下一步”的完整闭环。
+- 因此现有模型、tensor、checkpoint 和结果为 Historical / Archived；新定义模型尚未实现。
+
+STEP 4.1 source of truth：`docs/contracts_PIJWM_PI_GRAPH_OBJECT_FIELD_RELATION_MAPPING_V1.md` 与 `code/artifacts/protocols/pi_jwm_step4_1_pi_graph_mapping_v1_20260919/`。其中 `DO_NOT_IMPLEMENT_GRAPH_BUILDER_IN_STEP_4.1` 是该 Step 当时的停止门；后续 STEP 4.3A 已在数据合同闭合后完成 builder。
+
+## 7. 当前不属于新定义正式架构的内容
+
+- `code/src/pi_jwm/formal_candidate_rollout_planner_v1.py` 是 P6 CPU 原型，不是已开放的正式规划器。
+- `formal_complete_rssm_world_model_v1.py` 是历史 global RSSM，不是当前候选模型。
+- v11 selector/ranking 是历史诊断，不是当前 PI-JWM 主线。
+
+Unverified：任何只由旧 PPT、文件名或历史聊天提出但没有当前代码/config/experiment 支持的架构声明。
+# STEP 4.4 Structured RSSM（2026-09-21）
+
+STEP 4.4-PATCH3 已 COMPLETE / FROZEN，闭合未训练 CPU 机制的三个剩余语义。五类 aligned deterministic h 中仅 Vehicle Physical/Comm 有 z；只学习 vehicle motion 与 CSI。Wireless outage 是显式 known stochastic event，wired/Flow/Task/CPU/UAV 按规则推进，每步由 predicted state 重构图并反馈。5.1D 已补充 CPU Loss/KL/Metric integration；该实现仍不是精度、校准、规划或性能证据，Training Loop 尚未开始。
+
+STEP 5.0 已冻结训练架构边界：Motion/CSI 是唯一直接 prediction supervision；对应 training-only Target Encoder 只允许读本 family future target；Phy/Comm 分别做 analytic KL；v1 overshooting OFF。Encoder、RSSM、Prior、Posterior、Target Encoder、Decoder 后续 joint train，规则无 optimizer 参数。此处是 target contract，不是已实现训练图。
+
+STEP 5.1A-PATCH 已把 training target 与 STEP 4.4 对齐：Vehicle Motion 为逐步 `p_(t+k)-p_(t+k-1)`，并严格使用 current physical input slots；CSI 严格使用 current communication relation slots。Future GT 仍只在 target/training supervision，未进入 prior 或 current state。该 Patch 不实现 Posterior/Loss/Metric/Training。
+
+PATCH3 保持 Return 只复用 current-support typed Flow identity：`task_index + flow_type_index=Return`。冻结输入未暴露 `Task.return_size`，所以 real adapter 用 `task_return_requirement_known=false` 表示 unknown；unknown 不等于 no-return，computation finished 后输出 unresolved/blocking side-state。known-required/no-slot 则单独输出 `return_birth_required`。v1 不生成 future-only Return Flow。
+# 2026-09-28 STEP 6.2A objective boundary
+
+The target Planner objective is the researcher-specified lexicographic tuple `(N_DDL, A_DDL, J_Delay, J_Burden, J_Effort)`. STEP 6.2A only audits source semantics and records the protocol interface. It does not add an objective scorer to the architecture. The rollout contract remains distinct from selection: `MPC_OBJECTIVE=NOT_STARTED`, and no winner selection or closed-loop planner is implemented by this Step.
+# 2026-09-28 Planner Objective side-state boundary
+
+新增 Planner-only Task/Route 因果 side-state，独立于 Encoder/RSSM；只接当前 Raw、已对齐 deadline sidecar、候选 Route 控制及预测状态，不读 Future Target。4.2C-C route 数组不含 holder，而 4.4 跨跳规则按含 holder 的数组推进，构成当前 blocker。Route action 仅改 endpoints/revision，不改完整数组；side-state 可检测分歧，不能代替模型修复。

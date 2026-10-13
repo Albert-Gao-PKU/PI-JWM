@@ -1,0 +1,115 @@
+{
+  "variant": "full",
+  "config": {
+    "seed": 5601,
+    "learning_rate": 0.0003,
+    "weight_decay": 0.0,
+    "batch_size": 8,
+    "gradient_clip_norm": 1.0,
+    "max_epochs": 10,
+    "max_steps": 5520,
+    "stage1_steps": 552,
+    "checkpoint_patience": 3,
+    "max_horizon": 4,
+    "curriculum": {
+      "horizons": [
+        1,
+        2,
+        4
+      ],
+      "start_steps": [
+        0,
+        1104,
+        2208
+      ]
+    },
+    "kl_schedule": {
+      "target_beta": 1.0,
+      "warmup_steps": 1104,
+      "free_bits": 0.1
+    },
+    "rssm": {
+      "d_encoder": 16,
+      "d_h": 16,
+      "d_z": 4,
+      "mlp_width": 24,
+      "graph_layers": 2,
+      "n_comm_rb": 50,
+      "rollout_horizon": 2,
+      "slot_duration_s": 0.1,
+      "rb_bandwidth_mhz": 2.0,
+      "noise_power_mw": 3.9810717055349695e-12,
+      "outage_snr_threshold": 10.0,
+      "v2v_tx_power_dbm": 23.0,
+      "vehicle_to_infra_tx_power_dbm": 26.0,
+      "uav_or_rsu_tx_power_dbm": 29.0,
+      "prior_log_std_min": -5.0,
+      "prior_log_std_max": 2.0,
+      "posterior_log_std_min": -5.0,
+      "posterior_log_std_max": 2.0,
+      "physical_topology_mode": "radius_knn",
+      "physical_radius_m": 1000.0,
+      "physical_k": 2,
+      "initialization_seed": 440,
+      "development_only": true,
+      "research_frozen": false
+    },
+    "encoder": {
+      "d_h": 16,
+      "mlp_hidden_width": 24,
+      "type_embedding_dim": 4,
+      "lifecycle_embedding_dim": 4,
+      "direction_embedding_dim": 4,
+      "graph_layers": 2,
+      "enable_p2a": true,
+      "enable_p2c": true,
+      "enable_reverse_comm": true,
+      "enable_reverse_flow": true,
+      "enable_reverse_task_agent": true,
+      "enable_reverse_dag": false,
+      "csi_history_encoder": false,
+      "aggregator": "masked_mean",
+      "update_rule": "residual_layernorm",
+      "initialization_seed": 431,
+      "development_only": true,
+      "research_frozen": false,
+      "enable_geometry_branch": true,
+      "enable_csi_history": true,
+      "enable_count_aggregation": true
+    },
+    "csi_decoder_output_space": "raw_db",
+    "csi_decoder_bias_init_policy": "train_only_csi_mean",
+    "device": "cuda"
+  },
+  "dataset": {
+    "dataset_id": "pi_jwm_formal_dataset_v1_h2_l4_20260923",
+    "dataset_manifest_hash": "6392a08b31340812463be9e3f5f78891d39933c54d50c71cca1984b3bf9448bc",
+    "formal_package_hashes": {
+      "graph": "8bf3be889332cdb92e99c5881f27d575db7074d0280bdf1d392bbf373101ddb3",
+      "normalization": "8208dff6c97059a9ac9a8bac5c5e4a4928d1db6f0ab7bdbc2500fc5b92140b28",
+      "samples": "21e4f2ea527a8e0c658b30029e1c4a37633c26216222d06a5fb2d4edf2cbd0cb",
+      "target": "e37a0eaf02e6b08dddcc4af6f4bde2aeb9dea64e64352640d3919440038dad22",
+      "tensor": "fb7eb8b25581d0e0b23e62676b6ac02e9bcbdcded6bf83d9db904c83b3967b0f"
+    },
+    "train_sample_count": 4416,
+    "validation_sample_count": 1104,
+    "sample_index_sha256": "bd721fd0bfd837744392447ec742ae1d8f79a767f46f9ae6ba172316c4ff6954",
+    "encoder_normalization_sha256": "3a7cfe37d2124f930c2be1aa9b2b8ae868497a26631699237dbebc8240090dbd",
+    "research_source_sha256": {
+      "code/scripts/run_research_geo_temporal_count_v1.py": "408e982e639e07b0e16e5656cd0beb88dd850e11943d4592fab7bbaeab9cbfca",
+      "code/src/pi_jwm/research_geo_temporal_count_v1.py": "cebdecf4e50834f7dc074265f9f31958e3476006d228ca9c8e8a552791794177",
+      "code/src/pi_jwm/step4_3b_dual_graph_encoder_v1.py": "80926907e5fa26b1bca76f4707dc6d1075525d107895db38d5516d2117ff7a4a",
+      "code/src/pi_jwm/step5_2_training_loop_v1.py": "05a8bf3b8bd8c76b25e1327d34e268566902e6c273220335dc370f6b9449ea4a",
+      "code/src/pi_jwm/step5_5_full_sharded_loader_v1.py": "9c42e4db11f50e9ac769fadfc2819c950062edffe9b7581db2084f133910a4b1",
+      "code/src/pi_jwm/step4_4_structured_rssm_world_model_v1.py": "b4b3bf30be7541013c0e7a1539cdf9fd62624237345d71c79de301fe51770d27"
+    }
+  },
+  "git_commit": null,
+  "baseline_source_commit": "f95bf2e5b9430666f325af3e6d6846d68b97e6e8",
+  "torch": "2.7.1+cu118",
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "model_parameters": 113430,
+  "encoder_parameters": 47368,
+  "formal_performance_claim": false
+}

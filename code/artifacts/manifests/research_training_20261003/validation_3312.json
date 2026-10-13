@@ -1,0 +1,109 @@
+{
+  "L_Val": 0.059272236451157645,
+  "per_horizon": [
+    {
+      "horizon": 1,
+      "motion_numerator": 3.177716196369147,
+      "motion_count": 20600,
+      "csi_numerator": 727398.1693115234,
+      "csi_count": 6179400,
+      "L_Mot": 0.00015425806778491004,
+      "L_CSI": 0.1177133976294662,
+      "L_Pred": 0.05893382784862555,
+      "available_sample_count": 1104
+    },
+    {
+      "horizon": 2,
+      "motion_numerator": 3.8566981593030505,
+      "motion_count": 20600,
+      "csi_numerator": 729318.0528564453,
+      "csi_count": 6179400,
+      "L_Mot": 0.0001872183572477209,
+      "L_CSI": 0.11802408856142106,
+      "L_Pred": 0.05910565345933439,
+      "available_sample_count": 1104
+    },
+    {
+      "horizon": 3,
+      "motion_numerator": 5.4032275659265,
+      "motion_count": 20600,
+      "csi_numerator": 731516.6623535156,
+      "csi_count": 6179400,
+      "L_Mot": 0.00026229260028769413,
+      "L_CSI": 0.1183798851593222,
+      "L_Pred": 0.059321088879804945,
+      "available_sample_count": 1104
+    },
+    {
+      "horizon": 4,
+      "motion_numerator": 7.440102188615128,
+      "motion_count": 20600,
+      "csi_numerator": 735939.2346191406,
+      "csi_count": 6179400,
+      "L_Mot": 0.0003611700091560742,
+      "L_CSI": 0.11909558122457531,
+      "L_Pred": 0.05972837561686569,
+      "available_sample_count": 1104
+    }
+  ],
+  "raw_metrics": {
+    "motion": [
+      {
+        "horizon": 1,
+        "raw_mae": 0.21731240562443593,
+        "raw_rmse": 0.40802488609848997,
+        "valid_element_count": 20600
+      },
+      {
+        "horizon": 2,
+        "raw_mae": 0.21927521302862074,
+        "raw_rmse": 0.41372344850340215,
+        "valid_element_count": 20600
+      },
+      {
+        "horizon": 3,
+        "raw_mae": 0.22502803630041845,
+        "raw_rmse": 0.4217992824054489,
+        "valid_element_count": 20600
+      },
+      {
+        "horizon": 4,
+        "raw_mae": 0.23332683924332406,
+        "raw_rmse": 0.4305813145216873,
+        "valid_element_count": 20600
+      }
+    ],
+    "csi": [
+      {
+        "horizon": 1,
+        "raw_mae": 1.8324717825051784,
+        "raw_rmse": 2.6221870815820627,
+        "valid_element_count": 6179400
+      },
+      {
+        "horizon": 2,
+        "raw_mae": 1.8421459244248026,
+        "raw_rmse": 2.625645291267846,
+        "valid_element_count": 6179400
+      },
+      {
+        "horizon": 3,
+        "raw_mae": 1.8450619867649973,
+        "raw_rmse": 2.6295999324344823,
+        "valid_element_count": 6179400
+      },
+      {
+        "horizon": 4,
+        "raw_mae": 1.849096281912989,
+        "raw_rmse": 2.6375369287397787,
+        "valid_element_count": 6179400
+      }
+    ]
+  },
+  "validation_windows": 1104,
+  "prior_only": true,
+  "parameter_unchanged": true,
+  "future_posterior_teacher_calls": 0,
+  "future_target_encoder_calls": 0,
+  "wall_seconds": 6258.569694940001
+}

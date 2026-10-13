@@ -1,0 +1,73 @@
+{
+  "contract": {
+    "component_unsupported_mask": true,
+    "deterministic_rebuild": true,
+    "flow_semantics": true,
+    "future_target_excluded_from_input": true,
+    "history_steps": 2,
+    "horizon_steps": 4,
+    "motion_future_target": true,
+    "real_causal_trajectory": true,
+    "stable_id_index_presence_mask": true,
+    "topology": {
+      "k": 2,
+      "mode": "radius_knn",
+      "radius_m": 1000.0
+    },
+    "train_only_normalization": true,
+    "trajectory_level_split": true,
+    "wireless_per_rb_csi_target": true
+  },
+  "dataset_id": "pi_jwm_formal_dataset_v1_h2_l4_20260923",
+  "formal_dataset": true,
+  "hashes": {
+    "graph": "8bf3be889332cdb92e99c5881f27d575db7074d0280bdf1d392bbf373101ddb3",
+    "normalization": "8208dff6c97059a9ac9a8bac5c5e4a4928d1db6f0ab7bdbc2500fc5b92140b28",
+    "samples": "21e4f2ea527a8e0c658b30029e1c4a37633c26216222d06a5fb2d4edf2cbd0cb",
+    "target": "e37a0eaf02e6b08dddcc4af6f4bde2aeb9dea64e64352640d3919440038dad22",
+    "tensor": "fb7eb8b25581d0e0b23e62676b6ac02e9bcbdcded6bf83d9db904c83b3967b0f"
+  },
+  "packages": {
+    "graph": "packages/graph",
+    "normalization": "packages/normalization",
+    "samples": "packages/samples",
+    "target": "packages/target",
+    "tensor": "packages/tensor"
+  },
+  "provenance": {
+    "action_coverage": "action_coverage_audit.json",
+    "collection_summary": "collection_summary.json",
+    "raw_trajectories": "raw_trajectory_provenance.json",
+    "split_manifest": "split_manifest.json"
+  },
+  "runtime_hashes": {
+    "graph": "95d23695e6901c02aa8768414157bed08c5456a7ec8c62d0045927dd631bfe1d",
+    "normalization": "1e86bbac6e6ee2d1f1d24e572c5433ed56b1e00c0423bd468fb5150378e6fed5",
+    "samples": "d062328bd96b73dfa7c48f0ebe087dcc729b45b456f2ab9cb191324d68aac98e",
+    "target": "99355ae9218e495c0164b73ab4b9560a4f0000c6c1042e468974d8c18388fa47",
+    "tensor": "13918fc1f99b51e16cee309a8d4d5907af8b7e62a0b9a186270bf4b43fd5b1b5"
+  },
+  "runtime_packages": {
+    "graph": "runtime/graph.npz",
+    "normalization": "runtime/normalization.json",
+    "samples": "runtime/samples.json",
+    "target": "runtime/target.npz",
+    "tensor": "runtime/tensor.npz"
+  },
+  "sample_path": "packages/samples",
+  "schema_version": "PI-JWM-Step-5.5-Formal-Dataset-Manifest-v1",
+  "scope": {
+    "baseline": false,
+    "formal_training": false,
+    "gpu": false,
+    "locked_test_accessed": false,
+    "performance_claim": false,
+    "planner": false
+  },
+  "split": {
+    "locked_test": null,
+    "seed": 20260923,
+    "train_trajectories": 48,
+    "validation_trajectories": 12
+  }
+}

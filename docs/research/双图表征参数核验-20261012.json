@@ -1,0 +1,200 @@
+{
+  "scope": "read_only_cpu_module_construction_no_training_no_gpu_no_locked_test",
+  "baseline_source_commit": "f95bf2e5b9430666f325af3e6d6846d68b97e6e8",
+  "deployment_source_hashes_match": true,
+  "original_git_baseline_initialization_matches": true,
+  "all_flags_off_initialization_matches_original": true,
+  "all_flags_off_forward_matches_original_git_baseline": true,
+  "baseline_encoder_parameters": 37080,
+  "full_encoder_parameters": 47368,
+  "encoder_increment": 10288,
+  "encoder_increment_pct": 27.74541531823085,
+  "baseline_training_model_parameters": 103142,
+  "full_training_model_parameters": 113430,
+  "model_increment_pct": 9.97459812685424,
+  "common_components": {
+    "structured_rssm": 63230,
+    "training_target_encoder": 2304,
+    "training_future_posterior": 528,
+    "total": 66062
+  },
+  "baseline_modules": {
+    "entity_type_embedding": 64,
+    "agent_type_embedding": 64,
+    "lifecycle_embedding": 64,
+    "comm_type_embedding": 32,
+    "flow_type_embedding": 32,
+    "task_agent_type_embedding": 32,
+    "dag_type_embedding": 8,
+    "direction_embedding": 8,
+    "physical_node_encoder": 792,
+    "agent_encoder": 600,
+    "task_encoder": 792,
+    "physical_relation_encoder": 744,
+    "comm_relation_encoder": 2952,
+    "logical_flow_encoder": 648,
+    "carrying_encoder": 576,
+    "flow_fuse_encoder": 1224,
+    "task_agent_relation_encoder": 552,
+    "dag_relation_encoder": 552,
+    "physical_gru": 1632,
+    "agent_gru": 1632,
+    "task_gru": 1632,
+    "flow_gru": 1632,
+    "relation_processors": 8520,
+    "agent_family_fuse": 1680,
+    "task_family_fuse": 1272,
+    "physical_node_update": 1224,
+    "agent_cross_fuse": 1272,
+    "agent_node_update": 1224,
+    "task_node_update": 1224,
+    "p2a_gate": 528,
+    "p2a_value": 1224,
+    "p2c_gate": 784,
+    "p2c_value": 1608,
+    "physical_node_norm": 32,
+    "agent_node_norm": 32,
+    "task_node_norm": 32,
+    "relation_norms": 160
+  },
+  "full_modules": {
+    "entity_type_embedding": 64,
+    "agent_type_embedding": 64,
+    "lifecycle_embedding": 64,
+    "comm_type_embedding": 32,
+    "flow_type_embedding": 32,
+    "task_agent_type_embedding": 32,
+    "dag_type_embedding": 8,
+    "direction_embedding": 8,
+    "physical_node_encoder": 792,
+    "agent_encoder": 600,
+    "task_encoder": 792,
+    "physical_relation_encoder": 744,
+    "comm_relation_encoder": 2952,
+    "logical_flow_encoder": 648,
+    "carrying_encoder": 576,
+    "flow_fuse_encoder": 1224,
+    "task_agent_relation_encoder": 552,
+    "dag_relation_encoder": 552,
+    "physical_gru": 1632,
+    "agent_gru": 1632,
+    "task_gru": 1632,
+    "flow_gru": 1632,
+    "relation_processors": 8520,
+    "agent_family_fuse": 1680,
+    "task_family_fuse": 1272,
+    "physical_node_update": 1224,
+    "agent_cross_fuse": 1272,
+    "agent_node_update": 1224,
+    "task_node_update": 1224,
+    "p2a_gate": 528,
+    "p2a_value": 1224,
+    "p2c_gate": 1040,
+    "p2c_value": 1992,
+    "physical_node_norm": 32,
+    "agent_node_norm": 32,
+    "task_node_norm": 32,
+    "relation_norms": 160,
+    "geometry_encoder": 744,
+    "comm_history_gru": 1632,
+    "comm_history_fuse": 1224,
+    "count_fuse": 6048
+  },
+  "variants": {
+    "baseline": {
+      "encoder_parameters": 37080,
+      "training_model_parameters": 103142
+    },
+    "geometry": {
+      "encoder_parameters": 38464,
+      "training_model_parameters": 104526
+    },
+    "history": {
+      "encoder_parameters": 39936,
+      "training_model_parameters": 105998
+    },
+    "count": {
+      "encoder_parameters": 43128,
+      "training_model_parameters": 109190
+    },
+    "geometry_history": {
+      "encoder_parameters": 41320,
+      "training_model_parameters": 107382
+    },
+    "full": {
+      "encoder_parameters": 47368,
+      "training_model_parameters": 113430
+    }
+  },
+  "count_processors": {
+    "comm_forward": 864,
+    "comm_reverse": 864,
+    "flow_forward": 864,
+    "flow_reverse": 864,
+    "task_agent_forward": 864,
+    "task_agent_reverse": 864,
+    "dag_forward": 864
+  },
+  "graph_layers_share_encoder_processors": true,
+  "focused_read_only_cpu_tests": {
+    "run": 3,
+    "passed": true
+  },
+  "formal_graph_data_read_only_audit": {
+    "graph_shards_sha_verified": 60,
+    "capacity_ranges": {
+      "agent_nodes": {
+        "min": 10,
+        "max": 24
+      },
+      "align_relations": {
+        "min": 10,
+        "max": 24
+      },
+      "comm_relations": {
+        "min": 74,
+        "max": 508
+      },
+      "dag_relations": {
+        "min": 26,
+        "max": 196
+      },
+      "flow_carrying_state": {
+        "min": 16,
+        "max": 39
+      },
+      "flow_relations": {
+        "min": 16,
+        "max": 39
+      },
+      "geo_comm_relations": {
+        "min": 74,
+        "max": 508
+      },
+      "physical_nodes": {
+        "min": 10,
+        "max": 24
+      },
+      "physical_relations": {
+        "min": 90,
+        "max": 552
+      },
+      "task_agent_relations": {
+        "min": 173,
+        "max": 417
+      },
+      "task_nodes": {
+        "min": 57,
+        "max": 139
+      }
+    },
+    "valid_current_relation_incidences_over_all_windows": {
+      "physical_relations": 880206,
+      "comm_relations": 767862,
+      "flow_relations": 23665,
+      "task_agent_relations": 682230,
+      "dag_relations": 154855
+    },
+    "incidence_counts_are_repeated_window_counts_not_unique_objects": true
+  }
+}

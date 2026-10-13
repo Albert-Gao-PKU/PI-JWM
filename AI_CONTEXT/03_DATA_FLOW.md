@@ -1,0 +1,151 @@
+# 数据流与张量合同
+
+## 2026-09-29 STEP 6.3B Candidate data flow
+
+Formal TRAIN action frames → frozen structural catalog; at each future step current/predicted state + catalog + structural choice → causal Task/relation/Exec/UAV binding → complete CandidateActionStep → multidimensional support label/admission. An admitted CandidateActionSequence can use the existing adapter/rollout/scorer; the grammar itself does not call them. `H_sup` remains pending until actual rollout. Validation is descriptive only and never alters the TRAIN catalog.
+
+## STEP 6.2B-PATCH 当前 Route no-op 数据流
+
+Planner v1 候选每 horizon 的 `route.entries=[]` → 6.0C gate PASS → 原 11 tensor adapter 将 Route Task/Flow indices 编译为负数哨兵 → 4.4 不执行 Route encoder 注入或 Route rule。任何非空 Route 在 gate 以 `OUTSIDE_PLANNER_ROUTE_NOOP_ONLY_V1` 拒绝，pending `flow_index=-1` 不再进入正式 rollout。Comm/Comp/Mob、scorer 五项和共用 `H_eff` 的数据流不变。下方 6.2B/6.2A-CLOSURE 段是历史路径。
+
+## STEP 6.2B 历史评分数据流
+
+当前因果 anchor/已对齐 deadline sidecar → Planner-only objective side-state；同一 anchor 的已给定合法候选 → Step 6.1 H1–H4 predicted trace；scorer 先对各候选求 `H_sup`、对集合求共用 `H_eff`，再计算五项 score/逐 Task/Horizon 分解。Future Target、future truth/FAILED label 不进入评分。Comm 分母取 anchor 当前有效无线关系条件下正式张量的全局 RB 维度，非旧 `rb_active_mask` 的关系行数。pending Flow Route 映射 `flow_index=-1` 时评分拒绝；需研究者处理当前 gate 与 fixed-support 合同冲突。
+
+## STEP 6.2A-CLOSURE Planner Route domain
+
+Planner v1 CandidateDomain emits only explicit Route no-op. Comm/Comp/Mob are rebuilt from the current causal or predicted state, then one admitted step is compiled by the existing adapter and passed to the unchanged frozen World Model transition. The domain uses TRAIN support only; no Future Target data is loaded. After each transition, state/graph/control fingerprints become the input to the next CandidateDomain.
+
+## STEP 6.1 当前观测到 H4 反事实推演
+
+Formal Validation 当前 Sample/Tensor/Graph + 同 frame/time 的 Raw 静态 CPU/UAV 控制侧状态 → 同一个 `PreparedRolloutAnchor`（当前 `Z_t^{PI,L_g}` 与 posterior mean）→ CONTROL/单一动作族改变 → 每步按预测 state 编译正式 11 action tensors → `one_step(prior_mode=mean, service_mode=expectation)` → 下一步预测 state/graph/latent，直到 H4。Future Target package 不进入此链；future posterior teacher/target encoder 未实例化。`stochastic_common_seed_diagnostic.json` 仅另行以显式 generator 做小范围配对复现。
+
+## STEP 6.0C Planner-only 因果侧输入
+
+当前 Raw `node_cpu_capacity_observation_rows` 的原始单位值和 observed mask → Planner 静态每时隙预算；Sample `static.agent_static_capability.value` 交叉核对，Tensor `agent_cpu_capacity_raw`/mask 与 Graph `agent_nodes.cpu_capacity`/mask 是对应静态表示。normalized CPU 不参与预算。当前 Raw `entities[]` 仅对 UAV 读取 `heading_unit=rad` 的 heading 和 elevation_rad → Planner-only 控制侧状态 → 六档绝对命令；下一步控制侧 heading/elevation 等于命令值，不预测 position/CSI/task/flow。Future Target、Model 输入、Formal Dataset 均不变。
+
+## STEP 6.0B CPU/UAV 数据来源审计
+
+CPU：`FogProfile.cpu` → Raw 决策容量行（带观察 mask）→ Sample `static.agent_static_capability` → Tensor `agent_cpu_capacity_raw`/mask → Graph `agent_nodes.cpu_capacity`；以上始终是静态容量。Comp action `allocated_cpu_per_s` → simulator callback → Task 实际服务；过去服务不是当前动态可用量。后者在当前输入链中 absent。UAV：Formal Dataset 行为策略写 `azimuth_rad/elevation_rad/speed_mps`，经 `TrafficScheduler.setUAVMobilityPatterns` 进入 AirFogSim；60 条已验哈希 Raw 的 11520 行动作范围只是数据支持，不是硬可行域。
+
+## 2026-09-24 STEP 5.6A CUDA 消费路径（运行验收完成）
+
+远端只使用可移植 Training Bundle：`formal_dataset_manifest.json → FormalTrainingInterface → FullFormalShardDataset → FullFormalTrainer(device="cuda")`。DataLoader 只读取 batch 所需的 Sample/Tensor/Graph/Target trajectory shard，五类 package 的原 hash 不变；不传 Raw。构造当前 wired capacity 所需的唯一双向链路已由本地 60/60 Raw 审计，作为 Formal v1 已冻结环境常量输入，不读取未来目标。
+
+训练抽样按 seed+epoch 先打乱 48 条 train trajectory，再打乱各轨迹内部窗口；每 epoch 4416 个窗口各一次，validation 永不混入。未来 Return Route 后出现而当前无 Return Flow 槽位的 Comm 分量显式记为 fixed-support blocked；当前锚点已有的合法 typed Flow 在 prior 预测中提前完成时，Comm 仍可绑定该 current relation，但不复活 Flow。完整 1104-window GPU validation 已按 12 条 validation trajectory 分四个互斥组串行遍历，用各 family/horizon 的 numerator/count 聚合；唯一性、prior-only 和无参数更新总回执通过。
+
+## 2026-09-23 Formal Dataset v1 当前链路
+
+STEP 5.5-PATCH 增加正式消费分支：`packages/samples/index.json` 全量 5520 个窗口 → 以 frozen 48/12 trajectory split 校验 → 每次只读取 batch 所需的 trajectory shard → 按 sample identity 同步切取 Sample/Tensor/Graph/Target → `FullFormalTrainer`。encoder 的 base/extension/Flow stats 来自 Formal Dataset train-only normalization，Physical relation stats 从 48 条 train graph shard 流式计算；validation 不参与拟合。`runtime/` 1+1 只用于原 mini smoke，不能代表全量消费。
+
+Future Return birth 从 target frame 的真实 typed Return Flow 与 current `input_entity_index.logical_flow` 比较；缺失 current slot 时只记录 target-side unsupported/fixed-support，当前 input 不变，Motion/CSI 有效 mask 保留。旧 package acceptance receipt 的三个零值仅是旧字段读取，须以 PATCH 全量结构审计为准；它按 5520 windows × 4 future frames 计数，Return-birth 事件 8828、unresolved 0、fixed-support blocked 8828。目标张量数值与原 frozen package 不变。
+
+真实 AirFogSim Raw（60×96 transitions）→ H=2/L=4 model-ready Samples → trajectory-sharded Tensor / Typed Graph / Motion-CSI Target → 仅 48 条 train trajectory 拟合的 Normalization → manifest-relative 五类 package。固定 split 为 48 train/12 validation，对应 4416/1104 windows；Future Target 保持独立 namespace，Future Action unresolved=0，`locked_test` 不存在。五类 package 的 SHA-256、identity alignment、serialize/reload 和 deterministic rebuild 已通过机器验收。
+
+原 STEP 5.5 CPU smoke 实际读取 `runtime/` 中 1 train + 1 validation，并非完整 5520-window package；其结论限于 `RUNTIME_MINI_SMOKE=PASS`。PATCH 另行验证正式 shard 消费路径；两种证据分开记录。
+
+> 2026-09-18 Step 1 结论：下列 v5 数据流是旧协议下可追溯资产，尚未满足新 `00–06` 的 Agent/Communication/Task-Agent 关系和 Route/Comm/Comp/UAV 四类动作合同。稳定 ID/index、mask、split 和 train-only normalization 原则可复用；新 schema 尚未冻结。
+
+## Step 2.2 real raw flow
+
+One non-locked AirFogSim trajectory verified six repeated `Decision_t -> Route/Comm/Comp/UAV Mobility -> env.step() -> Outcome_t` transitions. Every next Decision is independently recollected at the next loop start. Route/Comm/Comp distinguish explicit empty/no-op from a missing field. Vehicle motion is advanced by SUMO; UAV mobility is the planner action. Evidence: `code/artifacts/protocols/pi_jwm_raw_multi_decision_step_real_airfogsim_v2_20260919/`.
+
+## Step 2.4 frozen causal raw flow
+
+The current Raw layer admits only tasks with `arrival_time_s <= decision_time_s` into `O_t`, History and the input-side Entity Index. Later AirFogSim schedules remain internal metadata. Decision rows include real CSI and masked CPU capacity observations; Outcome maps aggregate same-slot real transfer events and Task computed-size deltas. Raw simulator acceleration and canonical backward-difference acceleration are different fields; missing history produces `null + mask=false`. Evidence: `code/artifacts/protocols/pi_jwm_raw_contract_causal_complete_v2_20260919/`. Dataset/Tensor mapping is not started.
+
+## 总流程
+
+```text
+AirFogSim 参考仿真运行
+→ formal trajectory / bundle
+→ tensorization 与非锁定 split
+→ 因果运动字段派生
+→ FormalAirFogSimWindowDataset
+→ history + static + future_action + target
+→ 双图底座与实体 RSSM
+→ prior 20 步输出
+→ FormalMetricAccumulator
+→ checkpoint gate、manifest 与独立 acceptance
+```
+
+Source of truth：数据读取与访问守卫见 `code/src/pi_jwm/formal_airfogsim_dataset_v1.py`、`formal_airfogsim_window_v1.py`；当前 tensor 事实见其 manifest 和 validation report。
+
+## 旧协议正式 tensor（Historical / Archived）
+
+- 路径：`code/artifacts/formal_tensor/pi_jwm_v4_tensor_v5_causal_motion_h20_unlocked_20260906/`
+- history/horizon：8/20。
+- train/validation/calibration：9828/3276/1638 windows。
+- 只包含 non-locked split；validation report 记录 `locked_test_not_materialized=true`、`locked_test_accessed=false`。
+- normalization 来源固定为 train。
+- 因果运动合同：`causal_backward_difference_v1`，由历史位置向后差分派生，不暴露未来运动。
+- 构建入口：`code/scripts/build_formal_causal_motion_tensor_v1.py::build_causal_motion_tensor()`。
+
+## Window 输出结构
+
+`code/src/pi_jwm/formal_airfogsim_window_v1.py::FormalAirFogSimWindowDataset.__getitem__()` 返回：
+
+- `history`：过去实体状态、presence/mask、DAG、聚合链路标签和六维 `node_motion_state/mask`。
+- `static`：节点类型、端点索引、flow/task/DAG 有效性和跨图映射。
+- `future_action`：`task_action`、presence、目标节点和显式源节点。
+- `target`：未来 20 步状态、事件、DAG、链路活动/速率/RB 等评价标签。
+- `metadata`：sample、split、合同等追溯信息。
+
+## 核心对象含义
+
+- node state 7维：位置、运动、计算能力与存储等；具体名称和单位来自 `code/src/pi_jwm/airfogsim_tensor_v2.py` 与 metric registry。
+- physical edge state 5维：distance、csi_mean、rate_sum、active_task_count、allocated_rb_count。
+- flow state 5维：total_data、remaining_data、delivered_cumulative、delivered_this_slot、age。
+- task state 8维：数据量、工作量、时间和任务进度相关字段。
+- 信息 agent 当前没有独立观测张量，使用所附着物理节点的编码表示。
+
+## 训练数据流
+
+DataLoader → 模型 prior/teacher 输出 → `formal_world_model_loss()`。base 阶段训练确定性底座；RSSM 阶段冻结 base 并训练实体级随机动力学。类别权重由 train 数据计算，validation/calibration 不反向进入训练统计。
+
+## 评价数据流
+
+`code/src/pi_jwm/formal_world_model_metrics_v1.py::FormalMetricAccumulator` 按 horizon、mask、单位和分母累计连续状态、二分类事件、不确定性和系统指标。`code/src/pi_jwm/formal_p4_gate_v1.py::evaluate_p4_checkpoint_gates()` 将当前 checkpoint 与冻结基线比较。正式数字最终必须以 acceptance JSON 重算结果为准。
+
+## 安全边界
+
+- `require_split_access()` 默认拒绝 locked split；正式 runner 还拒绝路径中出现 `locked_test`。
+- `locked_test_accessed=false`。
+- `formal_performance_claim_ready=false`。
+- 通信 Outcome 拆为 `wireless_delivered_data_by_task`、`wired_delivered_data_by_task` 和两部分按 task 聚合的 `delivered_data_by_task`。wired source 是真实 `WiredNetworkManager.step` 返回的 slot transmitted bytes；`{}` + observed mask 表示已观测但无服务，`null` + missing mask/reason 表示不可恢复。
+- Raw Trajectory Layer / 01 与当前最小 Dataset/Tensor / 02 已冻结；STEP 4.2A 以独立版本链生成 graph input extension，但尚未生成 graph object。
+- Step 3.1F 最小样本：History 为 `[t-H+1,t]` 的 `H=2` observation，并在过去 `tau<t` 行保留对齐的已执行四类 Action 和 Outcome；当前帧不含 `A_t/Y_t`。Future Action/Target 为 `[t,t+L-1]` 的 `L=2` 帧。input physical/task index 来自整个 History 的因果可观对象 union，flow index 来自过去 Outcome transfer event；Future Action 先按 anchor visibility 拒绝不可见 object，再引用同一 static union index；future-only endpoint 仍不进入 input Static。
+- STEP 3.3F CPU collation 入口为 `code/src/pi_jwm/step3_3_model_input_tensor_v1.py`；12 个 Step 3.2 sample 生成 fixed-shape arrays。Past Outcome 为独立 H-1 轴；Target 保留 future entity/task/flow/service；stable index、固定 vocab、padding/mask 和 target namespace 均有 semantic receipt。该 tensor 尚未被双图或模型读取。
+- STEP 4.1 mapping 已核实：position、heading/elevation、wireless CSI、CPU static capacity 和若干 Task current fields 在 Raw 有来源但未进入当前 input tensor；wired relation 可由 `environment.wired_edges` / `hasLink` 取得但尚未逐 Decision 物化，无 CSI 时以 type + feature mask 表示；可选 wired numeric state 不属于 03 minimum。完整 stateful Flow 在当前 Raw 不足。过去 `past_outcome_flow_service` 仍只是一条 hop service outcome，不能改名成 current Flow total/rem。
+- STEP 4.2A 当前链路：原 Raw + decision-before-action wired amendment → Sample v5（position、typed Comm、static CPU、Task current、Src/Host/Exec/Ret）→ trajectory split/train-only normalization → Tensor v3。旧 Step 3 arrays 保留；Future Target 只用于隔离校验，不进入 History input。STEP 4.2B source audit 进一步确认 stable stateful Flow、Physical topology 和 graph object 仍不存在。
+- STEP 4.2B 机器证据：`transmitted_size` 是当前 stage/hop progress，完成 hop 后 reset；Input/Return remaining 与 stable identity 未证明，DAG 不生成 DepData Flow。综合 verdict=`FLOW_CONTRACT_NOT_YET_SUPPORTED`。
+- STEP 4.2B-PATCH：Flow verdict 仅由 Flow-specific evidence 计算；dynamic available CPU、storage、wired queue/load/utilization 是独立 `other_information_graph_gaps`。simulator-issued Flow ID unavailable 是事实，logical `task_id + input/return` identity 是否采用留待研究者决定；DepData 无真实 transfer process 也不允许由 DAG 虚构。
+- STEP 4.2C-C（含 PATCH）：`code/src/pi_jwm/step4_2c_c_flow_sample_tensor_v1.py` 消费 C-B Raw 的 `logical_flow_rows/carrying_rows`，建立独立 History `logical_flow` union 与 target namespace。Logical Flow 保存 FlowID/Epoch/destination/total/E2E/presence/status；Carrying 保存 holder/hop/route/progress；completed/superseded known row 与 padding 分开。仅 `total_data/e2e_delivered/e2e_remaining/hop_progress/hop_remaining` 在 `known=true AND presence=true AND feature_mask=true AND value!=null AND split=dev_train` 上标准化，stats 的 `mask_policy` 精确保留该 Step 3.2 policy，单位为 AirFogSim data-unit；categorical/reference/Epoch/RouteRevision/presence 不标准化。History/target Logical/Carrying 四组 tensor semantic equality 与 target carrying future ground-truth namespace 均有机器检查。Tensor artifact 是 CPU/non-locked development evidence，不是 formal Dataset。
+- STEP 4.3A：`step4_3a_typed_dual_graph_builder_v1.py` 只读取冻结 Tensor 的 `history[-1]`。位置/运动经显式 development topology config 形成 Physical blocks；其余 current tensor namespaces 分别进入独立 Information blocks；Align 使用同一 entity index，GeoComm 使用 wireless Comm endpoints 的有效 Physical representation。target namespace counterfactual 不改变当前图。
+- STEP 4.3B：`step4_3b_dual_graph_encoder_v1.py` 读取完整 History 的 Physical/Agent/Task/Logical Flow/Carrying raw fields 与 fixed train-only stats，再结合 STEP 4.3A current relation/connectivity，输出 aligned `Z_t^{PI,L_g}`。Future Target/Future Action 不进入 read path；graph layers 只做同一时刻表示细化，不执行状态转移。
+- STEP 4.4：`step4_4_structured_rssm_world_model_v1.py` 将 `Z_t^{PI,L_g}` 初始化为五类 aligned h 与 Vehicle/Comm z，按 stable slot 路由 Route/Comm/Comp/Mobility；每步执行 dynamics graph interaction → prior unknown dynamics → known stochastic wireless outage → deterministic Physical/Comm/Flow/CPU/Task rules → predicted graph rebuild → state feedback。已有 Return Flow 由 current-support `task_index + flow_type_index=Return` 精确绑定；冻结 current-side 不含 `Task.return_size`，因此无 slot 时 requirement 保持 unknown，并阻止错误 final completion。Future Target 不创建 slot或改变 binding。DAG 只看有效前驱；terminal Flow 同步 remaining/presence/carrying/status。当前仅有未训练 CPU rollout evidence。
+- STEP 5.1A-PATCH：`code/src/pi_jwm/step5_1a_motion_csi_target_contract_v1.py` 从 STEP 4.2A Sample 与真实 raw `outcome.channel_rows[].channel_attenuation_db` 构造 additive Future Target。Vehicle Motion 为 local one-step `[p_(t+k)-p_(t+k-1), v_(t+k)]`；第一步参考 History current，后续参考上一 Future GT frame。delta 使用冻结 position std（不减 position mean），speed/CSI 使用冻结 train-only mean/std。Motion entity 轴固定采用 current `input_entity_index["physical"]`；CSI relation 轴固定采用 current model communication slot，并按 relation identity、endpoint input slots、relation type 与 RB identity 对齐。12 个 non-locked development samples 的 patched receipt `passed=true`；5.1D 只在 target encoder/posterior/loss 路径读取 target，encoder/current prior 不读取；这不是正式 Dataset。
+- STEP 5.1A 保持 target 与 History/Input namespace 隔离；unsupported/unresolved/fixed-support-blocked 只进入 side metadata，不删除 window，也不改 Motion/CSI masks。5.1D 已在 CPU development path 实际执行 posterior/loss/metric；Future Target 仍只进入 posterior，不进入 prior。
+- STEP 5.2-PATCH：`step5_2_training_loop_v1.py` 使用同一 12-sample unified lineage（`dev_train=8`、`dev_validation=4`）。Stage 1 将 Motion/CSI target 分别编码到对应 future posterior，并用 posterior mean 做训练期预测与 KL；Stage 2 和 validation 先用 current-observation posterior `q(z_t|h_t,Z_t)` 初始化，之后只用 prior 和上一步预测状态递归 rollout。Future Target 只用于 Motion/CSI loss 与 training-only KL teacher；validation 使用 `model.eval()+no_grad()`，runtime proof 记录 future posterior teacher 与 target encoder 调用均为 0。验证损失按每个 horizon 的 Motion/CSI numerator/count 全验证集聚合。该路径仅完成少量 CPU optimizer smoke、prior-only validation 与 identity-safe checkpoint/resume。
+- STEP 4.2A-PATCH mask rule：observer 的 supported wireless directed relation 与 CSI feature observability 是两个层次。endpoint present 且 structural row 存在时，CSI `observed_mask=false` 仍保留 relation validity；CSI tensor mask=false、placeholder=0。relation presence=false 时 CSI mask 不得为 true。wired valid/no-CSI 使用同一分层原则。
+- STEP 4.2C-B Raw Flow rule：`target_node_id` 是 current action/carrying-hop target，不是可靠的 end-to-end destination。Input logical destination 从已建立 offload route terminal 捕获；Return 从 Decision task `return_destination_id` 捕获。Flow row 保存 source/capture phase；同一 `(TaskID, FlowType, Epoch)` destination 固定。真实两跳只在最终 hop 增加 E2E delivered，普通 hop advancement 只推进 hop index。
+- Remaining Task source：`_extract_tasks()` 已读取 return size/deadline/priority，但 frozen Raw decision row 未透传；它们不是 simulator-source missing。`task_delay` 已由当前 `elapsed_time_s=max(decision_time-arrival_time,0)` 因果表达。
+
+## 2026-09-22 STEP 5.1C-PATCH
+
+Unified Flow samples now use the same 12-window lineage as the 5.1A target. Physical and Communication support identity is checked slot by slot, with endpoint indices reverse-mapped to real entity IDs. Normalization is fit from unified `dev_train` History only (8 samples); validation (4 samples) is apply-only and Future Target is excluded. Historical 5-sample Flow stats remain provenance-only.
+
+Unverified：未在当前 tensor manifest、loader 或模型实际读路径出现的字段，不得推断为当前模型输入。
+
+## 2026-09-19 Raw 状态
+
+单步、多步、因果字段与 return route 已完成真实验收。Raw 层冻结不等于 Dataset/Tensor 已实现。
+# STEP 5.1D unified paired path（2026-09-22）
+
+12 个 unified samples 使用完整 Flow Tensor package，保留 contract、sample IDs/static/metadata、base Step 3.3 checks、unified dev_train-only Flow stats 和 ndarray。每个 sample 独立重建 4.3A graph（10/74 capacity）与 4.3B encoder，再由自身 state、真实 Future Action 和 target 进入两步 recursive STEP 4.4 prior/posterior/decoder。5.1D-PATCH receipt 47/47，pairing 12/12，unified stats source IDs、4.2A frozen batch recovery、exact upstream train lineage 与 runtime prior-target isolation 通过。Route/Comp 真实 non-empty coverage 为 0，仅验证 explicit no-op。
+# 2026-09-28 STEP 6.2A Planner objective provenance
+
+The source-to-metric matrix is `code/artifacts/protocols/pi_jwm_step6_2a_planner_objective_semantics_audit_v1_20260928/10_objective_field_provenance_matrix.json`. It separates simulator runtime, observer, Formal Raw, Sample, Tensor, Graph, World Model, and Planner-side availability. Deadline/arrival/priority/return support may exist upstream but are not all exposed in the frozen causal Planner state; they must not be reconstructed from Future Target, failure labels, or future schedules.
+# 2026-09-28 Planner-only sidecar
+
+Formal Raw 原样保留；当前 Raw 已含 `arrival_time_s`、`required_returned_size`、`return_destination_id`。非锁定 validation anchor 通过同种子/配置/已执行动作前缀重放，决策前新增 deadline sidecar，精确对齐 6 个 Task ID/槽位及当前物理状态。sidecar 不进入 Formal Sample/Tensor、训练 normalization 或 checkpoint。实际 Return requirement 还需预测计算节点与 Return 目的地不同；仅正返回大小不足以确定。

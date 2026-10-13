@@ -1,0 +1,579 @@
+{
+  "status": "passed",
+  "provenance": {
+    "variant": "full",
+    "config": {
+      "seed": 5601,
+      "learning_rate": 0.0003,
+      "weight_decay": 0.0,
+      "batch_size": 2,
+      "gradient_clip_norm": 1.0,
+      "max_epochs": 1,
+      "max_steps": 5,
+      "stage1_steps": 2,
+      "checkpoint_patience": 3,
+      "max_horizon": 4,
+      "curriculum": {
+        "horizons": [
+          1,
+          2,
+          4
+        ],
+        "start_steps": [
+          0,
+          2,
+          4
+        ]
+      },
+      "kl_schedule": {
+        "target_beta": 1.0,
+        "warmup_steps": 8,
+        "free_bits": 0.1
+      },
+      "rssm": {
+        "d_encoder": 16,
+        "d_h": 16,
+        "d_z": 4,
+        "mlp_width": 24,
+        "graph_layers": 2,
+        "n_comm_rb": 50,
+        "rollout_horizon": 2,
+        "slot_duration_s": 0.1,
+        "rb_bandwidth_mhz": 2.0,
+        "noise_power_mw": 3.9810717055349695e-12,
+        "outage_snr_threshold": 10.0,
+        "v2v_tx_power_dbm": 23.0,
+        "vehicle_to_infra_tx_power_dbm": 26.0,
+        "uav_or_rsu_tx_power_dbm": 29.0,
+        "prior_log_std_min": -5.0,
+        "prior_log_std_max": 2.0,
+        "posterior_log_std_min": -5.0,
+        "posterior_log_std_max": 2.0,
+        "physical_topology_mode": "radius_knn",
+        "physical_radius_m": 1000.0,
+        "physical_k": 2,
+        "initialization_seed": 440,
+        "development_only": true,
+        "research_frozen": false
+      },
+      "encoder": {
+        "d_h": 16,
+        "mlp_hidden_width": 24,
+        "type_embedding_dim": 4,
+        "lifecycle_embedding_dim": 4,
+        "direction_embedding_dim": 4,
+        "graph_layers": 2,
+        "enable_p2a": true,
+        "enable_p2c": true,
+        "enable_reverse_comm": true,
+        "enable_reverse_flow": true,
+        "enable_reverse_task_agent": true,
+        "enable_reverse_dag": false,
+        "csi_history_encoder": false,
+        "aggregator": "masked_mean",
+        "update_rule": "residual_layernorm",
+        "initialization_seed": 431,
+        "development_only": true,
+        "research_frozen": false,
+        "enable_geometry_branch": true,
+        "enable_csi_history": true,
+        "enable_count_aggregation": true
+      },
+      "csi_decoder_output_space": "raw_db",
+      "csi_decoder_bias_init_policy": "train_only_csi_mean",
+      "device": "cuda"
+    },
+    "dataset": {
+      "dataset_id": "pi_jwm_formal_dataset_v1_h2_l4_20260923",
+      "dataset_manifest_hash": "6392a08b31340812463be9e3f5f78891d39933c54d50c71cca1984b3bf9448bc",
+      "formal_package_hashes": {
+        "graph": "8bf3be889332cdb92e99c5881f27d575db7074d0280bdf1d392bbf373101ddb3",
+        "normalization": "8208dff6c97059a9ac9a8bac5c5e4a4928d1db6f0ab7bdbc2500fc5b92140b28",
+        "samples": "21e4f2ea527a8e0c658b30029e1c4a37633c26216222d06a5fb2d4edf2cbd0cb",
+        "target": "e37a0eaf02e6b08dddcc4af6f4bde2aeb9dea64e64352640d3919440038dad22",
+        "tensor": "fb7eb8b25581d0e0b23e62676b6ac02e9bcbdcded6bf83d9db904c83b3967b0f"
+      },
+      "train_sample_count": 4416,
+      "validation_sample_count": 1104,
+      "sample_index_sha256": "bd721fd0bfd837744392447ec742ae1d8f79a767f46f9ae6ba172316c4ff6954",
+      "encoder_normalization_sha256": "3a7cfe37d2124f930c2be1aa9b2b8ae868497a26631699237dbebc8240090dbd",
+      "research_source_sha256": {
+        "code/scripts/run_research_geo_temporal_count_v1.py": "e6d55f164fdc4dd65cddc3fa4fc34b3ef68f5461d9b992dff22d9647b4347fc6",
+        "code/src/pi_jwm/research_geo_temporal_count_v1.py": "cebdecf4e50834f7dc074265f9f31958e3476006d228ca9c8e8a552791794177",
+        "code/src/pi_jwm/step4_3b_dual_graph_encoder_v1.py": "80926907e5fa26b1bca76f4707dc6d1075525d107895db38d5516d2117ff7a4a",
+        "code/src/pi_jwm/step5_2_training_loop_v1.py": "05a8bf3b8bd8c76b25e1327d34e268566902e6c273220335dc370f6b9449ea4a",
+        "code/src/pi_jwm/step5_5_full_sharded_loader_v1.py": "9c42e4db11f50e9ac769fadfc2819c950062edffe9b7581db2084f133910a4b1",
+        "code/src/pi_jwm/step4_4_structured_rssm_world_model_v1.py": "b4b3bf30be7541013c0e7a1539cdf9fd62624237345d71c79de301fe51770d27"
+      }
+    },
+    "git_commit": "f95bf2e5b9430666f325af3e6d6846d68b97e6e8",
+    "torch": "2.14.0+cu130",
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "model_parameters": 113430,
+    "encoder_parameters": 47368,
+    "formal_performance_claim": false
+  },
+  "scope": "training_readiness_not_performance",
+  "checks": {
+    "all_shards": {
+      "shards": 60,
+      "windows": 5520,
+      "payload_hashes_verified": 60,
+      "wireless_history_rows": 1500822,
+      "source_audit_reused": "code/artifacts/research/geo_temporal_count_20261002/full_readiness_aligned/readiness.json",
+      "all_payloads_rehashed": true
+    }
+  },
+  "short_training": [
+    {
+      "global_step": 0,
+      "stage": "posterior_assisted_warmup",
+      "rollout_horizon": 1,
+      "L_Total": 0.8465416431427002,
+      "L_Pred": 0.8465416431427002,
+      "loss_finite": true,
+      "gradients_finite": true,
+      "parameter_update": {
+        "any_changed": true,
+        "changed_count": 374
+      },
+      "prior_only_rollout": true,
+      "future_state_not_rollout_input": true,
+      "wall_seconds": 10.466246589999969,
+      "new_branch_gradients": {
+        "geometry_encoder": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.005429961784102488
+        },
+        "p2c_gate": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.004971148708136752
+        },
+        "p2c_value": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.031365218907012604
+        },
+        "comm_history_gru": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.005088681311463006
+        },
+        "comm_history_fuse": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.0455558637768263
+        },
+        "count_fuse": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.012796981606925328
+        }
+      }
+    },
+    {
+      "global_step": 1,
+      "stage": "posterior_assisted_warmup",
+      "rollout_horizon": 1,
+      "L_Total": 0.6054093837738037,
+      "L_Pred": 0.4281406104564667,
+      "loss_finite": true,
+      "gradients_finite": true,
+      "parameter_update": {
+        "any_changed": true,
+        "changed_count": 392
+      },
+      "prior_only_rollout": true,
+      "future_state_not_rollout_input": true,
+      "wall_seconds": 4.610243771,
+      "new_branch_gradients": {
+        "geometry_encoder": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.1937710833735764
+        },
+        "p2c_gate": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.19754439732059836
+        },
+        "p2c_value": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 1.382390852086246
+        },
+        "comm_history_gru": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.26089424453675747
+        },
+        "comm_history_fuse": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 1.9055091235786676
+        },
+        "count_fuse": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.27474518846975116
+        }
+      }
+    },
+    {
+      "global_step": 2,
+      "stage": "prior_dominant_recursive",
+      "rollout_horizon": 2,
+      "L_Total": 1.1028553247451782,
+      "L_Pred": 0.7925230264663696,
+      "loss_finite": true,
+      "gradients_finite": true,
+      "parameter_update": {
+        "any_changed": true,
+        "changed_count": 479
+      },
+      "prior_only_rollout": true,
+      "future_state_not_rollout_input": true,
+      "wall_seconds": 9.10810080400006,
+      "new_branch_gradients": {
+        "geometry_encoder": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.12585709523409605
+        },
+        "p2c_gate": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.11574912490323186
+        },
+        "p2c_value": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 1.3274360382929444
+        },
+        "comm_history_gru": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.14077207073569298
+        },
+        "comm_history_fuse": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 1.078013843856752
+        },
+        "count_fuse": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.2403878316436021
+        }
+      }
+    },
+    {
+      "global_step": 3,
+      "stage": "prior_dominant_recursive",
+      "rollout_horizon": 2,
+      "L_Total": 1.278589129447937,
+      "L_Pred": 0.837560772895813,
+      "loss_finite": true,
+      "gradients_finite": true,
+      "parameter_update": {
+        "any_changed": true,
+        "changed_count": 473
+      },
+      "prior_only_rollout": true,
+      "future_state_not_rollout_input": true,
+      "wall_seconds": 9.099073093000015,
+      "new_branch_gradients": {
+        "geometry_encoder": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.05219477566424757
+        },
+        "p2c_gate": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.03477260115323588
+        },
+        "p2c_value": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.2891145619796589
+        },
+        "comm_history_gru": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.052248948253691196
+        },
+        "comm_history_fuse": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.3617754129227251
+        },
+        "count_fuse": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.10645523860830508
+        }
+      }
+    },
+    {
+      "global_step": 4,
+      "stage": "prior_dominant_recursive",
+      "rollout_horizon": 4,
+      "L_Total": 1.4178202152252197,
+      "L_Pred": 0.8946745991706848,
+      "loss_finite": true,
+      "gradients_finite": true,
+      "parameter_update": {
+        "any_changed": true,
+        "changed_count": 461
+      },
+      "prior_only_rollout": true,
+      "future_state_not_rollout_input": true,
+      "wall_seconds": 17.749171194999917,
+      "new_branch_gradients": {
+        "geometry_encoder": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.06324832106474787
+        },
+        "p2c_gate": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.0459721750812605
+        },
+        "p2c_value": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.684784276643768
+        },
+        "comm_history_gru": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.08943301346153021
+        },
+        "comm_history_fuse": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.6779398005455732
+        },
+        "count_fuse": {
+          "enabled": true,
+          "gradient_present": true,
+          "finite": true,
+          "abs_sum": 0.25045644515921595
+        }
+      }
+    }
+  ],
+  "cross_trajectory_h4": {
+    "horizon": 4,
+    "L_Total": 0.48898279666900635,
+    "L_Pred": 0.48898279666900635,
+    "loss_finite": true,
+    "gradients_finite": true,
+    "parameter_changed": true,
+    "new_branch_gradients": {
+      "geometry_encoder": {
+        "enabled": true,
+        "gradient_present": true,
+        "finite": true,
+        "abs_sum": 0.007108481237082742
+      },
+      "p2c_gate": {
+        "enabled": true,
+        "gradient_present": true,
+        "finite": true,
+        "abs_sum": 0.00482290807121899
+      },
+      "p2c_value": {
+        "enabled": true,
+        "gradient_present": true,
+        "finite": true,
+        "abs_sum": 0.035382128291530535
+      },
+      "comm_history_gru": {
+        "enabled": true,
+        "gradient_present": true,
+        "finite": true,
+        "abs_sum": 0.0032941863537416793
+      },
+      "comm_history_fuse": {
+        "enabled": true,
+        "gradient_present": true,
+        "finite": true,
+        "abs_sum": 0.02681604219833389
+      },
+      "count_fuse": {
+        "enabled": true,
+        "gradient_present": true,
+        "finite": true,
+        "abs_sum": 0.017076971637237648
+      }
+    },
+    "prior_only_rollout": true,
+    "future_target_consumed_by_rollout": false,
+    "trajectory_ids": [
+      "formal-v1-sim-2026092354-policy-2026092454",
+      "formal-v1-sim-2026092345-policy-2026092445"
+    ]
+  },
+  "tiny_overfit": {
+    "steps": 4,
+    "horizon": 1,
+    "prediction_loss": [
+      0.8443771600723267,
+      0.844385027885437,
+      0.8441990613937378,
+      0.8438463807106018,
+      0.8433496952056885
+    ],
+    "prediction_loss_reduced": true,
+    "formal_generalization_claim": false
+  },
+  "formal_batch8_h4": {
+    "horizon": 4,
+    "L_Total": 0.7821553945541382,
+    "L_Pred": 0.7821553945541382,
+    "loss_finite": true,
+    "gradients_finite": true,
+    "parameter_changed": true,
+    "new_branch_gradients": {
+      "geometry_encoder": {
+        "enabled": true,
+        "gradient_present": true,
+        "finite": true,
+        "abs_sum": 0.0022192473625182174
+      },
+      "p2c_gate": {
+        "enabled": true,
+        "gradient_present": true,
+        "finite": true,
+        "abs_sum": 0.0019410410059208516
+      },
+      "p2c_value": {
+        "enabled": true,
+        "gradient_present": true,
+        "finite": true,
+        "abs_sum": 0.014757109587662853
+      },
+      "comm_history_gru": {
+        "enabled": true,
+        "gradient_present": true,
+        "finite": true,
+        "abs_sum": 0.003187587317370344
+      },
+      "comm_history_fuse": {
+        "enabled": true,
+        "gradient_present": true,
+        "finite": true,
+        "abs_sum": 0.021291467201081105
+      },
+      "count_fuse": {
+        "enabled": true,
+        "gradient_present": true,
+        "finite": true,
+        "abs_sum": 0.0026541930656094337
+      }
+    },
+    "prior_only_rollout": true,
+    "future_target_consumed_by_rollout": false,
+    "batch_size": 8,
+    "wall_seconds": 69.60270298800015
+  },
+  "validation_interface": {
+    "sample_ids": [
+      "formal-v1-sim-2026092302-policy-2026092402::anchor-0001",
+      "formal-v1-sim-2026092302-policy-2026092402::anchor-0002"
+    ],
+    "prior_only": true,
+    "horizon_rows": [
+      {
+        "horizon": 1,
+        "L_Mot": 0.0009140918264165521,
+        "L_CSI": 1.151699423789978,
+        "L_Pred": 0.5763067603111267,
+        "motion_numerator": 0.0073127346113324165,
+        "csi_numerator": 4837.1376953125,
+        "motion_count": 8,
+        "csi_count": 4200,
+        "available": true,
+        "available_sample_count": 2
+      },
+      {
+        "horizon": 2,
+        "L_Mot": 0.003615499008446932,
+        "L_CSI": 1.00277578830719,
+        "L_Pred": 0.5031956434249878,
+        "motion_numerator": 0.028923992067575455,
+        "csi_numerator": 4211.658203125,
+        "motion_count": 8,
+        "csi_count": 4200,
+        "available": true,
+        "available_sample_count": 2
+      },
+      {
+        "horizon": 3,
+        "L_Mot": 0.007725875359028578,
+        "L_CSI": 0.8155310750007629,
+        "L_Pred": 0.41162848472595215,
+        "motion_numerator": 0.06180700287222862,
+        "csi_numerator": 3425.23046875,
+        "motion_count": 8,
+        "csi_count": 4200,
+        "available": true,
+        "available_sample_count": 2
+      },
+      {
+        "horizon": 4,
+        "L_Mot": 0.012443357147276402,
+        "L_CSI": 0.8200216293334961,
+        "L_Pred": 0.41623249650001526,
+        "motion_numerator": 0.09954685717821121,
+        "csi_numerator": 3444.0908203125,
+        "motion_count": 8,
+        "csi_count": 4200,
+        "available": true,
+        "available_sample_count": 2
+      }
+    ],
+    "parameters_unchanged": true,
+    "full_1104_window_validation": false
+  },
+  "fresh_checkpoint_reload_identical": true,
+  "resumed_optimizer_updates_encoder": true,
+  "passed": true,
+  "peak_allocated_bytes": 158246400,
+  "peak_reserved_bytes": 171966464
+}

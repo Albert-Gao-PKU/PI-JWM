@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "repository": "Albert-Gao-PKU/PI-JWM",
+  "visibility": "private",
+  "wsl_project": "/home/gao/projects/PI-JWM",
+  "staged_files": 1114,
+  "staged_file_bytes": 28470121,
+  "model_script_test_files_byte_identical": 805,
+  "python_sources_compile_passed": 774,
+  "baseline_encoder_parameters": 37080,
+  "full_encoder_parameters": 47368,
+  "dataset_or_weight_files_staged": false,
+  "known_credential_pattern_matches": 0,
+  "original_model_source_modified": false,
+  "training_started": false,
+  "gpu_used": false,
+  "locked_test_accessed": false,
+  "audit_phase": "before adding this receipt; final publication verified separately"
+}

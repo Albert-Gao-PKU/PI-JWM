@@ -1,0 +1,214 @@
+# 已确认决策
+
+## 2026-09-29 STEP 6.3C — Protocol implementation boundary
+
+Researcher-frozen 6.3B grammar and admission are unchanged. The implementation fact is that all future search methods must call one state-conditioned CandidateDomain and one interleaved one-step rollout protocol; `B_WM` counts unique admitted candidate-step transitions, with deterministic cache hits free. This is an implementation contract, not a choice of optimizer. Empty domains remain explicit dead ends and do not trigger horizon backoff.
+
+## 2026-09-29 STEP 6.3B — Researcher Decisions
+
+- Planner v1 允许一个 Task 多条 Comm row；修正旧 6.0A 重复 Task 拒绝。每 row 保持 TRAIN width 1/2/3、循环连续 block，正式池按 TRAIN 观察到的 `(start,width)` 对与当前因果关系绑定；有 eligible wireless Task 时每个都要有 row。
+- 正式 Mobility 候选只允许在场 UAV 共享同一个 HOLD/PROFILE_1–5；底层 6.0C 独立控制接口不因此删除。
+- 正式候选池只准 Formal TRAIN 已见的 Comm–Comp–Mob 联合结构；边际已见但联合未见只保留未来消融标签。时间支持只贴标签，相邻历史转移不作硬门槛。
+- 有当前可分配 computing Task 时 Comp 必须按现有因果 CPU base 与全局 alpha `{0.5,0.75,1.0}` 提交完整非空行；仅无该 Task 时 Comp 空 family。未来预测状态需显式 computing/唯一 Exec 才能构建 Comp base。
+- 这些决定只冻结候选语法和支持政策，不选择 Random/CEM/其他优化器，也不修改既有 Objective。
+
+## 2026-09-28 STEP 6.2B-PATCH — Researcher Decision
+
+- `PLANNER_V1_ROUTE_POLICY=EXPLICIT_NOOP_ONLY`：Planner v1 每个 horizon 的 Route family 为空；pending、已有 Flow 同路径、多跳、改目的地等所有非空 Route 候选均不得进入正式 v1 rollout。
+- Route schema/interface、4.4 learned Route encoder 与底层确定性多跳能力保留；Planner v1 实际优化动作族为 Comm/Comp/Mob。此策略是当前 learned-support 边界，不是 AirFogSim 物理合法性判断。
+- Objective `(N_DDL,A_DDL,J_Delay,J_Burden,J_Effort)` 及严格字典序不变。此前 6.2A-CLOSURE 的单跳 Route 决定已被本次更严格的 v1 决定取代；下文原记录保留为历史。
+
+## 2026-09-28 STEP 6.2A-CLOSURE — Historical Researcher Decisions
+
+- 保留当前 Formal `best.pt`，`RETRAIN_AFTER_ROUTE_RECOVERY=false`；SHA-256 保持 `941ee94131d406de914a79aeda43e929c92727631263d85221615422146a32c9`。
+- Planner v1 Route 保持启用，但 action domain 限定为 `FORMAL_DATASET_SINGLE_HOP_SUPPORT_V1`：单节点直达当前冻结 destination；multi-hop code 保留但移出 v1，作为后续扩展/消融，不作正式 learned-performance claim。
+- Future formal training 的 mandatory prerequisite 是 `CROSS_LAYER_RULE_SEMANTICS_GATE=PASS`。
+- 以上是研究者决定；完整 patched validation 未执行，旧 `LVal` 不改标为 patched 结果。
+
+## 2026-09-28 STEP 6.1 授权边界
+
+研究者授权执行冻结模型上的 H1–H4 候选推演机制与敏感性预检，明确禁止目标函数、候选选择、训练、GPU、baseline、locked_test 和闭环。本 Step 未新增科学方法、指标阈值或 Search/Learned/Hybrid 选型决定；6.0C 操作域和 5.6C checkpoint 身份保持不变。
+
+## 2026-09-26 STEP 6.0C 研究者决定
+
+**Researcher Decision A**：Planner v1 Comp 使用 `STATIC_PER_SLOT_BUDGET_V1`，同一节点同一时隙的分配总和不得超过当前观察到的原始单位静态 CPU 容量；容量缺失时拒绝正分配。这不是动态可用 CPU。**Simulator Fact**：动态可用 CPU 没有可靠决策时刻来源；`dynamic_available_cpu_available=false`，但 `planner_requires_dynamic_available_cpu=false`。
+
+**Researcher Decision B**：第一版正式 Planner rollout 的 UAV 域使用 `FORMAL_DATASET_MOBILITY_CORE_DOMAIN_V1` 六档控制，当前 heading/elevation 来自因果 Raw Planner-only side-state，HOLD 是显式零速命令。每 UAV 独立属于六档；不同 UAV 组合只标 marginal support，不称为已观测 exact joint support。
+
+**Researcher Decision C**：这是保守的首次 rollout 操作域，不是最终最优动作空间、仿真器硬界或安全规则。
+
+**Research Pending**：Search/Learned/Hybrid；连续或插值动作扩展；非零 elevation；空间/geofence；核心域外 OOD 处理；Planner objective/risk；fallback 安全声明；最终动作空间消融。
+
+## 2026-09-26 STEP 6.0B 审计事实与待决
+
+**Implementation/Simulator Fact（非 Researcher Decision）**：只证实静态 CPU 容量，未证实动态可用 CPU；UAV 示例配置和正式数据支持范围均非 simulator hard action bound。候选代码未改，两个 UNKNOWN 保留。
+
+**Research Pending**：动态 CPU 可行性如何定义/新增因果来源；UAV Planner 数值与空间域、越界策略和安全声称；若要求精确 AirFogSim Git commit，需补本地目录缺失的独立 Git provenance。此处没有新的研究者方法决定。
+
+## 2026-09-26：STEP 6.0A 研究者授权边界
+
+**Researcher Decision**：后续使用 MPC 滚动选择框架，动作仍为 Route/Comm/Comp/Mob，Vehicle 移动外生；候选生成采用统一可插拔合同；正式模型完成前不做模型依赖的候选评价。当前实现 horizon 最大 4 是 H1–H4 证据边界，不是最优值结论。
+
+**Research Pending**：Search/Learned/Hybrid 最终选型；优化器、proposal 结构与训练、数量/迭代/elite 等超参数；目标权重、风险、未来硬约束、动态 CPU 与 UNKNOWN 策略、fallback 安全性、延迟预算。Hybrid 没有被选定。
+
+这里只记录研究者明确作出的科研或工程决策。Codex 分析、候选建议和实验现象不能自动写成 Researcher Decision。
+
+## 2026-09-18：新定义与 Step 实施工作流
+
+**Researcher Decision**
+
+- `D:\shen\OB\科研\PIJWM` 中最新 `00–06` 是当前目标研究定义，该目录严格只读；所有工程修改留在 `D:\shen\PKU\PIJWM`。
+- 旧 P4/P6/P0–P10 计划、实验、artifact 和 checkpoint 保留为 Historical / Archived evidence，不再作为当前执行主线。
+- 当前只授权 Step 1 定义—实现审计、治理和 Tracker/记录框架；禁止自动进入 Step 2、正式训练、模型重构或新 planner。
+- 每个有效 Step/Substep 必须验证、记录、commit、push、固定格式汇报并停止；新定义正确性优先于旧 checkpoint 复用。
+
+## 2026-09-10：三方长期协作边界
+
+**Researcher Decision**
+
+- 研究者负责核心算法、总体架构、数学建模、科研 loss 设计、实验目的、消融变量、创新点和最终科研解释。
+- ChatGPT Web 负责理论讨论、推导、架构分析、实验设计讨论和结果分析。
+- Codex 作为 Research Engineer，负责实现、维护、实验执行、测试、代码事实检查和状态同步。
+- Codex 可以主动报告冲突和风险，但不能自行替换科研算法。
+
+影响范围：`AGENTS.md`、`AI_CONTEXT/`、以后所有代码与实验任务。
+
+## 2026-09-10：GitHub 与 AI_CONTEXT 工作流
+
+**Researcher Decision**
+
+- GitHub `main` 是网页端可见的动态事实来源。
+- `AI_CONTEXT/00_PROJECT_STATE.md` 是 ChatGPT 新对话的首入口；实现事实仍以源码/config/experiment 为最高优先级。
+- 每个有效、经过合理验证的小任务应形成清晰 commit 并 push；broken state 不得推到 `main`。
+- 完成本次授权更新后，Codex 不得自行修改 `AGENTS.md`，除非用户再次明确要求。
+
+## 2026-09-09：第三 seed 与同步延期
+
+**Researcher Decision**
+
+- seed `20260832`、远端训练和远端同步延后。
+- 现有入口保留，但不得自动启动；机器守卫见 `docs/registries/deferred_work.json`。
+
+## 2026-09-09：项目重构优先
+
+**Researcher Decision**
+
+- 先完成无损知识与工程重构，以长期协作和快速找到正确信息为标准。
+- 旧实验保留科研追溯价值；在引用、回归和回滚条件未闭合时不为目录整齐强行迁移。
+
+## 尚无决策
+
+- 最终 PI-JWM 方法是否冻结。
+- P6 采用纯候选搜索、学习策略还是混合策略。
+- 通信状态不足时是否增加 effective service/residual；外生到达/离开如何建模；planner objective/risk/fallback 的具体定义。
+- 是否授权执行 Step 2。旧 `seed=20260832` 不属于当前 active queue。
+
+Unverified：任何未在本文件或项目权威记录中标为 Researcher Decision 的科研取舍。
+
+## 2026-09-24：STEP 5.6A-CONFIG-FREEZE Formal Training Config v1
+
+**Researcher Decision**
+
+- Formal Dataset remains H=2/L=4 with 4416 train and 1104 validation windows; dataset identity, split, normalization and Definition 05 semantics are unchanged.
+- Formal training seed=5601, batch_size=8, 552 steps/epoch, AdamW learning_rate=3e-4, constant schedule, weight_decay=0, betas=(0.9,0.999), eps=1e-8, gradient_clip_norm=1.0.
+- Budget is max_epochs=10 and max_steps=5520. Stage 1 is steps 0–551 posterior-assisted H1; from global_step=552 the path is prior-dominant. Curriculum starts are H1 at 0, H2 at 1104, H4 at 2208.
+- KL target_beta=1.0, warmup_steps=1104, free_bits=0.1 per latent dimension, overshooting OFF. Validation is prior-only over all 1104 windows and H1–H4, every 1104 completed steps, with checkpoint selector `argmin L_Val`.
+- Latest checkpoints save every 552 completed steps; best checkpoints save on strict L_Val improvement; patience is 3 full validations. Resume restores model, optimizer, RNG, progress, selector state and curriculum state; sampler order is derived deterministically from formal seed and global step. FP32 is retained and AMP is not introduced.
+- This freezes the formal numerical protocol. It does not authorize starting Formal Training; `formal_training=false`, `gpu_training_verified=false`, `locked_test_accessed=false`, `baseline=false`, `planner=false`, and `performance_claim=false` remain required boundaries.
+
+## 2026-09-18 Researcher Decision
+
+Researcher explicitly fixed A_t=(A_t^Route,A_t^Comm,A_t^Comp,A_t^Mob), with A_t^Mob controlling UAV mobility only; vehicle motion remains SUMO external progression. This is a researcher decision, not an engineering inference.
+
+## 2026-09-19：Raw 因果与 acceleration 定义
+
+**Researcher Decision**
+
+- AirFogSim 未来 task schedule 可以保留为 raw/internal metadata，但不得进入当前 `O_t`、History 或 input-side Entity Index。
+- AirFogSim acceleration 原样保留为 raw simulator observation / audit 字段；PI-JWM canonical physical acceleration 定义为 `(v_t-v_{t-1})/delta_t`，只使用当前与历史信息。
+- 首个有效时间点或缺少历史速度必须使用明确 mask，不得伪造数值；raw 与 canonical 不得混名。
+- Step 2.3 只收尾 Raw Contract；后续 Dataset/Tensor 必须另行授权。
+
+## 2026-09-20：Stateful Flow Ledger 决策
+
+**Researcher Decision**
+
+- Flow 是 logical end-to-end business Flow；Hop 是 carrying segment。Flow 不等于 Hop、Route 或 Communication edge。
+- 使用 `AirFogSim real state/event → PI-JWM Causal Flow Ledger → Raw logical Flow state`，不修改 AirFogSim 核心传输状态机；Ledger 禁止读取 future action/outcome、target tensor、rollout prediction 或 future task schedule。
+- FlowID 固定为 `(TaskID, FlowType, Epoch)`，FlowType 为 `Input/Return/DepData`；不依赖 Hop 或 RouteRevision。
+- same-destination reroute 保持 FlowID/Epoch/E2E remaining，RouteRevision 增加。
+- logical destination change 创建新 Epoch；旧 Epoch `SUPERSEDED`，新 source=current holder，新 total/remaining=旧 remaining。
+- v1 destination change 只允许 clean hop boundary；partial active hop 必须拒绝或延迟，不在本 Step 实现 Planner。
+- DepData vocabulary 保留，但当前 AirFogSim runtime instances=0；DAG 不得生成 fake DepData Flow。
+- 本 Step 只授权 Ledger + Raw additive Flow contract；Sample/Tensor、Graph Builder、模型、训练、GPU 和 locked_test 均未授权。
+
+## 2026-09-20：STEP 4.2C-C 实施授权
+
+**Researcher Decision**
+
+- 明确授权将 STEP 4.2C-B Raw logical Flow/Carrying state additive 贯穿到 Model-ready Sample 与 CPU Tensor；只允许 index、align、mask、train-only normalization 和 collation。
+- 明确禁止 Graph Builder、Physical/Information graph、GNN/Encoder、World Model、Loss、Planner、Training、GPU、locked_test 和 formal Dataset；完成后停止等待审阅。
+- 真实 Return multi-hop、same-destination reroute runtime 与 formal Flow capacity 不得因实现便利被默认为已解决；只记录机器证据和边界。
+
+- Step 2.4（研究者明确批准）：Communication Outcome 在 Raw 层拆为 wireless、wired 和按 task 聚合 total；空 map 是已观测无服务，missing 必须是 null 加 mask/reason。该决定只冻结 Raw 语义，不授权 Dataset/Tensor 或模型实现。
+- STEP 3.1（研究者明确批准）：model-ready sample 使用因果 History、严格对齐的 Future Action/Target、无 future-object leakage 的 stable input index、独立 target-side future object 表示、四类 action 和显式 presence/feature mask；本决定不授权正式数据集、模型、loss、planner 或训练。
+- STEP 3.1R（研究者明确批准）：History 必须为 `[t-H+1,t]`；固定 input index/presence、真实 DAG source、typed target index、relation endpoint 和不可静默 `-1` 的 Action reference 属于修正合同。STEP 3.2 仍未授权。
+- STEP 3.1F（研究者明确批准）：History 必须包含 `O_{t-H+1:t}` 和过去 `A_{t-H+1:t-1}/Y_{t-H+1:t-1}`；input index 必须覆盖 History 的因果对象 union，过去 flow/relation/DAG 必须与同一套 index 对齐；future unresolved reference 只做事实审计，不自行决定未来对象表示。STEP 3.2 仍未授权。
+- STEP 3.1F-PATCH（研究者明确批准）：Future Action 先按 anchor visibility 判断是否允许引用，再使用同一 History-union `static.input_entity_index` 返回数值 index；`input_index_policy=history_causal_observable_object_union`、`future_action_index_policy=anchor_visibility_then_history_union_input_index`。STEP 3.2 仍未授权。
+- STEP 4.1（研究者明确批准）：只冻结定义 03 的 Physical / Information object-field-relation mapping，必须区分真实可用、Raw 有但未暴露、Raw 不足、Derived、禁止归属和待研究者决定；禁止在本 Step 实现 graph builder、GNN、encoder、coupling、World Model、Loss、Planner、训练、GPU 或访问 `locked_test`。发现最小定义缺口时记录并停止在 mapping 层。
+## 2026-09-20：STEP 4.3A 实施授权
+
+- 研究者明确授权 Frozen Tensor → typed Physical / Information dual-graph objects + Align/GeoComm。
+- Physical topology 参数只允许作为 deterministic development config，必须标记 `development_only=true`、`research_frozen=false`。
+- 明确禁止 Encoder/MLP/GRU/message passing/P2A/P2C/GNN/World Model/Loss/Planner/Training/GPU/locked_test/formal Dataset；完成后停止。
+# 2026-09-21 STEP 4.4 communication uncertainty decision
+
+- Researcher explicitly selected `Learned Future CSI -> Rule Nominal Rate -> Known Stochastic Outage Event -> Actual Service`.
+- Comm z represents CSI/channel uncertainty only. Outage is not a latent/head/input/target leak; both seeded `sample` and marked `expectation` modes are required. `learned_service_residual=false`.
+- Wired capacity may be added from causal simulator configuration; active membership/count must first be derived from Flow Carrying and checked equal to `WiredNetworkManager`.
+- STEP 4.4 implementation is authorized within the untrained CPU contract only; Loss, optimizer, Training, GPU, Planner, candidate generation, formal Dataset, and `locked_test` remain forbidden.
+
+## 2026-09-22 STEP 5.3E — CSI train-mean bias initialization
+
+**Researcher Decision**
+
+- PI-JWM v1 采用 raw CSI decoder，直接输出 CSI `[dB]` 并进入冻结的规则转移链；不采用 normalized-output decoder 作为 v1 主线。
+- CSI decoder 最后一层 bias 使用 frozen train-only CSI normalization mean 初始化，初始化发生在 optimizer 创建前；所有 RB 使用同一 global mean。
+- 当前 development provenance 为 `dev_train`；validation、Future Target 和 `locked_test` 不参与 mean fit。normalized-output bridge 仅保留为未来可选 ablation。
+# 2026-09-21 STEP 5.0 — Definition 05 researcher decisions
+
+- Prediction distribution: retain stochastic `z^Phy/z^Comm`; Vehicle Motion/CSI observation decoders are deterministic mean heads; no learned observation variance.
+- Prediction loss: Motion and CSI each use independently mask-normalized normalized-space MSE; v1 combines them equally.
+- Posterior teacher: only corresponding future Vehicle Motion or CSI targets may enter family-specific training-only target encoders; prior never reads Future Target; Future Graph/Flow/Task/DAG/rule-state are forbidden posterior evidence.
+- KL: separate analytic diagonal-Gaussian Physical/Communication KL. Physical mask is valid Vehicle slots only; Communication mask is valid+present+wireless+CSI-target-valid. Use configurable warm-up and small free bits; no KL balancing.
+- Overshooting: OFF in v1. Total objective is Prediction plus beta-weighted family KL.
+- Schedule: posterior-assisted short-horizon warm-up, then prior-dominant recursive curriculum `1→2→4→L`; Stage 2 posterior is KL teacher only; validation is always prior-only.
+- Fixed support: unsupported future structure uses component-level mask/exclude/classify with separate counts; valid Motion/CSI supervision remains; whole-window deletion is forbidden.
+- Rule states: no Flow/Task/DAG/Lifecycle/Completion learned head or independent loss; natural differentiable rule paths may carry gradients, but discrete rules stay exact.
+- Trainable modules: jointly train Dual-Graph Encoder, RSSM dynamics, Prior, Posterior, Target Encoders and Motion/CSI Decoders. STEP 4.3B FROZEN means architecture/interface, not weights.
+- Validation/evaluation: checkpoint and early stopping use prior-only horizon-mean `L_Val`; KL is diagnostic. Report Motion/CSI separately with per-horizon raw-unit MAE/RMSE; uncertainty sampling is auxiliary; system metrics remain closed-loop metrics.
+- These explicit decisions supersede conflicting observation-NLL/Event/Residual/overshooting clauses in the read-only older Definition 05 note. The private note remains unchanged.
+
+## 2026-09-23 STEP 5.5 — Formal Dataset v1 protocol
+
+**Researcher Decision**
+
+- Formal Dataset v1 使用 `H=2`、`L=4`；每条真实 AirFogSim trajectory 含 96 个连续 transition 和 97 个 Decision，由此每条构造 92 个 windows。
+- 接受 60 条完整 trajectory；simulator primary seeds 为 `2026092300..2026092359`，对应 policy seeds 为 `2026092400..2026092459`。失败条目不得部分接受，按后续未用 deterministic seed pair 替换并记录 lineage。
+- 固定 `split_seed=20260923`，先按 trajectory deterministic shuffle，再分为 48 train / 12 validation；禁止 window-level random split，禁止根据后续 loss 或统计量改 split。
+- Formal Physical topology v1 固定为 `radius_knn(radius=1000m,k=2)`；这是 Dataset v1 protocol choice，不是 topology optimality claim。
+- 数据采集采用 causal coverage-oriented 四动作 policy：`A_t=(Route,Comm,Comp,Mobility)`，动作只能依赖当前观察/因果 History，车辆仍由 SUMO 外生推进；policy 不是 Planner，也不作 reward 最优声明。
+- Dataset 不包含或物化 `locked_test`。本 Step 仅 CPU Dataset/Interface acceptance；GPU、formal training、baseline、Planner 和 performance claim 均未授权。
+# 2026-09-28 — Researcher-specified Planner Objective v1 target
+
+- Target tuple: `(N_DDL, A_DDL, J_Delay, J_Burden, J_Effort)`, minimized lexicographically.
+- Throughput is diagnostic/final metric, not a separate weighted objective. Energy and Fairness are outside Planner v1. Priority is inactive (`w_q=1`). Risk is defined but inactive.
+- A common support-aware horizon is required. Future-only Return birth is a model-support boundary, not candidate illegality.
+- These semantics are a target definition; 6.2A did not implement scoring. `CANDIDATE_METHOD_SELECTION=RESEARCH_PENDING` remains unchanged.
+# 2026-09-28 STEP 6.2A-PATCH — Researcher Decisions
+
+- Planner Objective v1 仍按 `(N_DDL,A_DDL,J_Delay,J_Burden,J_Effort)` 字典序最小化；RouteRevision 不单独进入 effort。`J_Effort` 只用 Comm/Comp/Mob 的当前 anchor 适用项和冻结分母。
+- Priority 权重关闭，所有当前任务 `w_q=1`，Priority 字段不是 6.2B 前置条件。Risk 已定义但不启用；Energy、Fairness 不进入 Objective v1。
+- 真实闭环业务主吞吐为 End-to-End Useful Throughput；all-hop Network Service Throughput 只作诊断。Planner 中 throughput 不是单独加权项。
+- 允许独立 Planner-only causal side-state 携带当前已知、可确定递推的 deadline、Return/control route 元数据；不改 Formal Dataset、训练 Tensor 或 learned 模型。
+- `B_Tx` 和 6.2B readiness 是工程审计事实，不是研究者决定。本补丁机器结论为 BLOCKED；路线语义修复方案尚待研究者决定。
